@@ -1,96 +1,155 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro no Bolão</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        .loading {
-            display: none;
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bolão Mega da Virada</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      margin: 0;
+      padding: 20px;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+    }
+    .form-container {
+      max-width: 500px;
+      background: #fff;
+      margin: auto;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    label {
+      display: block;
+      margin: 15px 0 5px;
+      font-weight: bold;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      border-radius: 8px;
+      border: 1px solid #ccc;
+      margin-bottom: 10px;
+    }
+    .dezenas-container {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 10px;
+    }
+    .dezena-btn {
+      padding: 10px;
+      text-align: center;
+      background: #ecf0f1;
+      border: 1px solid #bdc3c7;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    .dezena-btn.selecionado {
+      background: #27ae60;
+      color: #fff;
+      border-color: #2ecc71;
+    }
+    #resumo {
+      background: #dff9fb;
+      padding: 10px;
+      margin-top: 15px;
+      border-radius: 8px;
+      font-weight: bold;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Cadastro no Bolão</h2>
-        <input type="text" id="nome" placeholder="Nome Completo">
-        <input type="text" id="planilha" placeholder="Nome da Planilha">
-        <input type="text" id="whats" placeholder="WhatsApp">
-        <input type="text" id="cidade" placeholder="Cidade">
-        <input type="text" id="dezenas" placeholder="Dezenas escolhidas">
-        <button id="btnEnviar">Confirmar Envio</button>
-        <p class="loading">🔄 Enviando...</p>
-        <div id="mensagem"></div>
-    </div>
+  <div class="form-container">
+    <h2>Bolão Mega da Virada 2024</h2>
     
-    <script>
-        document.getElementById("btnEnviar").addEventListener("click", async () => {
-            const dados = {
-                Nome: document.getElementById("nome").value,
-                NomePlanilha: document.getElementById("planilha").value,
-                WhatsApp: document.getElementById("whats").value,
-                Cidade: document.getElementById("cidade").value,
-                Dezenas: document.getElementById("dezenas").value
-            };
+    <label for="nome">Nome a colocar no jogo:</label>
+    <input type="text" id="nome" placeholder="Ex: João da Sorte" required>
 
-            console.log("Dados para envio:", dados);
-            document.querySelector(".loading").style.display = "block";
-            document.getElementById("mensagem").innerHTML = "";
-            
-            try {
-                const response = await fetch("https://api.sheetmonkey.io/form/p4oMvaKXhTcF3REZ2ghE8m", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dados)
-                });
-                const responseData = await response.text();
-                console.log("Resposta do servidor:", responseData);
-                
-                if (response.ok) {
-                    document.getElementById("mensagem").innerHTML = "<h3 style='color: green;'>✅ Cadastro enviado com sucesso!</h3>";
-                } else {
-                    document.getElementById("mensagem").innerHTML = "<h3 style='color: red;'>❌ Erro ao enviar os dados. Tente novamente.</h3>";
-                }
-            } catch (error) {
-                document.getElementById("mensagem").innerHTML = "<h3 style='color: red;'>⚠️ Erro de conexão. Tente novamente.</h3>";
-                console.error("Erro na requisição:", error);
-            } finally {
-                document.querySelector(".loading").style.display = "none";
-            }
-        });
-    </script>
+    <label for="qtdJogos">Quantos jogos deseja?</label>
+    <select id="qtdJogos">
+      <option value="1">1 Jogo (R$5,00)</option>
+      <option value="2">2 Jogos (R$10,00)</option>
+      <option value="3">3 Jogos (R$15,00)</option>
+    </select>
+
+    <label>Escolha 6 dezenas:</label>
+    <div class="dezenas-container" id="dezenasContainer"></div>
+
+    <button onclick="gerarResumo()">Confirmar Escolhas</button>
+    
+    <div id="resumo" style="display:none;"></div>
+    
+    <button id="btnFinalizar" onclick="enviarParaPlanilha()" style="display:none;">Confirmar Envio</button>
+  </div>
+
+  <script>
+    const dezenasContainer = document.getElementById("dezenasContainer");
+    const resumo = document.getElementById("resumo");
+    const btnFinalizar = document.getElementById("btnFinalizar");
+
+    // Criar botões de dezenas
+    for (let i = 1; i <= 60; i++) {
+      const btn = document.createElement("div");
+      btn.classList.add("dezena-btn");
+      btn.textContent = i.toString().padStart(2, "0");
+      btn.onclick = () => btn.classList.toggle("selecionado");
+      dezenasContainer.appendChild(btn);
+    }
+
+    function gerarResumo() {
+      const nome = document.getElementById("nome").value.trim();
+      const qtdJogos = document.getElementById("qtdJogos").value;
+      const dezenasSelecionadas = Array.from(document.querySelectorAll(".dezena-btn.selecionado"))
+        .map(el => el.textContent);
+      
+      if (nome === "") {
+        alert("Preencha o nome.");
+        return;
+      }
+
+      if (dezenasSelecionadas.length !== 6) {
+        alert("Selecione exatamente 6 dezenas.");
+        return;
+      }
+
+      const preco = qtdJogos * 5;
+      resumo.innerHTML = `
+        Nome: ${nome}<br>
+        Qtde de Jogos: ${qtdJogos}<br>
+        Dezenas: ${dezenasSelecionadas.join(", ")}<br>
+        Total: R$${preco},00
+      `;
+      resumo.style.display = "block";
+      btnFinalizar.style.display = "block";
+    }
+
+    function enviarParaPlanilha() {
+      const nome = document.getElementById("nome").value.trim();
+      const qtdJogos = document.getElementById("qtdJogos").value;
+      const dezenasSelecionadas = Array.from(document.querySelectorAll(".dezena-btn.selecionado"))
+        .map(el => el.textContent);
+      const preco = qtdJogos * 5;
+
+      fetch('https://script.google.com/macros/s/SEU_ID_DO_SCRIPT/exec', {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          nome,
+          jogos: qtdJogos,
+          dezenas: dezenasSelecionadas.join(", "),
+          total: `R$${preco},00`
+        })
+      }).then(() => {
+        alert("Dados enviados com sucesso!");
+        location.reload();
+      }).catch(() => alert("Erro ao enviar!"));
+    }
+  </script>
 </body>
 </html>
