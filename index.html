@@ -186,16 +186,13 @@
         });
 
         if (response.ok) {
-          confirmacao.innerHTML = "<h2>Cadastro realizado com sucesso! ✅</h2><p>Obrigado por participar do Bolão da Mega Positivo!</p>";
+          alert("Cadastro enviado com sucesso!");
+          location.reload();
         } else {
-          alert("Erro ao enviar os dados. Tente novamente.");
-          form.style.display = "block";
-          confirmacao.style.display = "none";
+          alert("Erro ao enviar cadastro. Tente novamente.");
         }
       } catch (error) {
-        alert("Erro de conexão. Tente novamente mais tarde.");
-        form.style.display = "block";
-        confirmacao.style.display = "none";
+        alert("Erro ao conectar com o servidor. Verifique sua conexão.");
       } finally {
         loading.style.display = "none";
       }
