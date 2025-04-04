@@ -94,4 +94,68 @@
     const dezenasDiv = document.getElementById("dezenas");
     const contador = document.getElementById("contador");
     const form = document.getElementById("formulario");
-    const loading = document.getElementById("loadi
+    const loading = document.getElementById("loading");
+    let dezenasSelecionadas = [];
+
+    for (let i = 1; i <= 60; i++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = i.toString().padStart(2, "0");
+      btn.addEventListener("click", () => selecionarDezena(i, btn));
+      dezenasDiv.appendChild(btn);
+    }
+
+    function selecionarDezena(numero, btn) {
+      if (dezenasSelecionadas.includes(numero)) {
+        dezenasSelecionadas = dezenasSelecionadas.filter(d => d !== numero);
+        btn.classList.remove("selected");
+      } else {
+        if (dezenasSelecionadas.length >= 10) return;
+        dezenasSelecionadas.push(numero);
+        btn.classList.add("selected");
+      }
+      contador.textContent = `Dezenas escolhidas: ${dezenasSelecionadas.length}/10`;
+    }
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+
+      if (dezenasSelecionadas.length !== 10) {
+        alert("Você precisa escolher exatamente 10 dezenas.");
+        return;
+      }
+
+      const dados = {
+        nome: document.getElementById("nome").value,
+        nomePlanilha: document.getElementById("nomePlanilha").value,
+        whatsapp: document.getElementById("whatsapp").value,
+        cidade: document.getElementById("cidade").value,
+        dezenas: dezenasSelecionadas.join(", ")
+      };
+
+      try {
+        loading.style.display = "block";
+        const response = await fetch("https://api.sheetmonkey.io/form/p4oM1UvZGPo4XrMoJ2rCmu", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(dados)
+        });
+
+        if (response.ok) {
+          alert("Cadastro enviado com sucesso!");
+          form.reset();
+          dezenasSelecionadas = [];
+          document.querySelectorAll(".grid button").forEach(b => b.classList.remove("selected"));
+          contador.textContent = "Dezenas escolhidas: 0/10";
+        } else {
+          alert("Erro ao enviar. Tente novamente.");
+        }
+      } catch (error) {
+        alert("Erro de conexão. Verifique sua internet e tente novamente.");
+      } finally {
+        loading.style.display = "none";
+      }
+    });
+  </script>
+</body>
+</html>
