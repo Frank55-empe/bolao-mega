@@ -184,14 +184,14 @@
           },
           body: JSON.stringify(dados)
         });
+
         if (response.ok) {
-          alert("Cadastro enviado com sucesso!");
-          location.reload();
+          confirmacao.innerHTML = `<h2>Cadastro enviado com sucesso!</h2><p>Boa sorte no bolão! 🍀</p>`;
         } else {
-          alert("Erro ao enviar os dados. Tente novamente.");
+          confirmacao.innerHTML += `<p style="color: red;">Erro ao enviar os dados. Tente novamente.</p>`;
         }
       } catch (error) {
-        alert("Erro de conexão. Verifique sua internet.");
+        confirmacao.innerHTML += `<p style="color: red;">Erro de conexão. Tente novamente mais tarde.</p>`;
       } finally {
         loading.style.display = "none";
       }
