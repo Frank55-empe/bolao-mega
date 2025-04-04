@@ -1,155 +1,293 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Bolão Mega da Virada</title>
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f5f5f5;
-      margin: 0;
-      padding: 20px;
-    }
-    h2 {
-      text-align: center;
-      color: #2c3e50;
-    }
-    .form-container {
-      max-width: 500px;
-      background: #fff;
-      margin: auto;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    label {
-      display: block;
-      margin: 15px 0 5px;
-      font-weight: bold;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
-      margin-bottom: 10px;
-    }
-    .dezenas-container {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 10px;
-    }
-    .dezena-btn {
-      padding: 10px;
-      text-align: center;
-      background: #ecf0f1;
-      border: 1px solid #bdc3c7;
-      border-radius: 8px;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    .dezena-btn.selecionado {
-      background: #27ae60;
-      color: #fff;
-      border-color: #2ecc71;
-    }
-    #resumo {
-      background: #dff9fb;
-      padding: 10px;
-      margin-top: 15px;
-      border-radius: 8px;
-      font-weight: bold;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cadastro Bolão da Mega</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            margin: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="tel"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #007bff;
+            color: white;
+        }
+        button.secondary {
+            background-color: #6c757d;
+        }
+        button:hover {
+            opacity: 0.9;
+        }
+        #dezena-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        #dezena-table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        #dezena-table td.selected {
+            background-color: #28a745;
+            color: white;
+        }
+        #contador-dezenas {
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        #tela-confirmacao, #tela-agradecimento, #tela-novo-cadastro {
+            display: none;
+            margin-top: 20px;
+            padding: 15px;
+            border: 1px solid #eee;
+            border-radius: 5px;
+            background-color: #f9f9f9;
+        }
+        .dados-confirmacao {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
-  <div class="form-container">
-    <h2>Bolão Mega da Virada 2024</h2>
-    
-    <label for="nome">Nome a colocar no jogo:</label>
-    <input type="text" id="nome" placeholder="Ex: João da Sorte" required>
+    <div class="container">
+        <div id="tela-novo-cadastro">
+            <h2>Cadastro Bolão da Mega</h2>
+            <div class="form-group">
+                <label for="nome-completo">Nome Completo:</label>
+                <input type="text" id="nome-completo" required>
+            </div>
+            <button onclick="mostrarOpcoesJogo()">Continuar</button>
+        </div>
 
-    <label for="qtdJogos">Quantos jogos deseja?</label>
-    <select id="qtdJogos">
-      <option value="1">1 Jogo (R$5,00)</option>
-      <option value="2">2 Jogos (R$10,00)</option>
-      <option value="3">3 Jogos (R$15,00)</option>
-    </select>
+        <div id="tela-opcoes-jogo" style="display: none;">
+            <h2>Opções de Jogo</h2>
+            <p>Olá <span id="nome-participante-opcoes"></span>! Você já participou da rodada anterior?</p>
+            <button onclick="mostrarTelaFinalizacao()">Manter meu jogo</button>
+            <button onclick="mostrarTelaCadastroDezenas()">Novo jogo</button>
+        </div>
 
-    <label>Escolha 6 dezenas:</label>
-    <div class="dezenas-container" id="dezenasContainer"></div>
+        <div id="tela-cadastro-dezenas" style="display: none;">
+            <h2>Escolha suas 10 dezenas (01 a 60)</h2>
+            <div class="form-group">
+                <label for="nome-jogo">Nome para o jogo (opcional):</label>
+                <input type="text" id="nome-jogo">
+            </div>
+            <div class="form-group">
+                <label for="whatsapp">WhatsApp:</label>
+                <input type="tel" id="whatsapp" required>
+            </div>
+            <div class="form-group">
+                <label for="cidade">Cidade:</label>
+                <input type="text" id="cidade" required>
+            </div>
+            <table id="dezena-table">
+                <tbody>
+                    </tbody>
+            </table>
+            <div id="contador-dezenas">Dezenas selecionadas: 0 / 10</div>
+            <button onclick="confirmarJogo()" disabled id="btn-confirmar-jogo">Confirmar Jogo</button>
+        </div>
 
-    <button onclick="gerarResumo()">Confirmar Escolhas</button>
-    
-    <div id="resumo" style="display:none;"></div>
-    
-    <button id="btnFinalizar" onclick="enviarParaPlanilha()" style="display:none;">Confirmar Envio</button>
-  </div>
+        <div id="tela-confirmacao" style="display: none;">
+            <h2>Confirme seus dados</h2>
+            <div class="dados-confirmacao"><strong>Nome Completo:</strong> <span id="conf-nome-completo"></span></div>
+            <div class="dados-confirmacao"><strong>Nome no Jogo:</strong> <span id="conf-nome-jogo"></span></div>
+            <div class="dados-confirmacao"><strong>WhatsApp:</strong> <span id="conf-whatsapp"></span></div>
+            <div class="dados-confirmacao"><strong>Cidade:</strong> <span id="conf-cidade"></span></div>
+            <div class="dados-confirmacao"><strong>Dezenas Escolhidas:</strong> <span id="conf-dezenas"></span></div>
+            <div class="button-group">
+                <button onclick="enviarParaPlanilha()">Enviar e Finalizar</button>
+                <button class="secondary" onclick="voltarParaCadastro()">Corrigir</button>
+            </div>
+        </div>
 
-  <script>
-    const dezenasContainer = document.getElementById("dezenasContainer");
-    const resumo = document.getElementById("resumo");
-    const btnFinalizar = document.getElementById("btnFinalizar");
+        <div id="tela-finalizacao" style="display: none;">
+            <h2>Finalização</h2>
+            <p>Seu jogo será mantido para esta rodada. Boa sorte!</p>
+            <button onclick="voltarParaInicio()">Novo Cadastro</button>
+        </div>
 
-    // Criar botões de dezenas
-    for (let i = 1; i <= 60; i++) {
-      const btn = document.createElement("div");
-      btn.classList.add("dezena-btn");
-      btn.textContent = i.toString().padStart(2, "0");
-      btn.onclick = () => btn.classList.toggle("selecionado");
-      dezenasContainer.appendChild(btn);
-    }
+        <div id="tela-agradecimento" style="display: none;">
+            <h2>Cadastro Realizado!</h2>
+            <p>Agradecemos o seu cadastro no Bolão da Mega!</p>
+            <p>Para que seu jogo seja confirmado e concorra aos prêmios, efetue o pagamento no valor correspondente via PIX:</p>
+            <p><strong>Chave PIX:</strong> 35991717912 - Frank de Souza Borges</p>
+            <p>Após a confirmação do pagamento, seu jogo estará na planilha e você estará concorrendo!</p>
+            <button onclick="voltarParaInicio()">Novo Cadastro</button>
+        </div>
+    </div>
 
-    function gerarResumo() {
-      const nome = document.getElementById("nome").value.trim();
-      const qtdJogos = document.getElementById("qtdJogos").value;
-      const dezenasSelecionadas = Array.from(document.querySelectorAll(".dezena-btn.selecionado"))
-        .map(el => el.textContent);
-      
-      if (nome === "") {
-        alert("Preencha o nome.");
-        return;
-      }
+    <script>
+        const nomeCompletoInput = document.getElementById('nome-completo');
+        const nomeParticipanteOpcoes = document.getElementById('nome-participante-opcoes');
+        const nomeJogoInput = document.getElementById('nome-jogo');
+        const whatsappInput = document.getElementById('whatsapp');
+        const cidadeInput = document.getElementById('cidade');
+        const dezenaTable = document.getElementById('dezena-table');
+        const contadorDezenas = document.getElementById('contador-dezenas');
+        const btnConfirmarJogo = document.getElementById('btn-confirmar-jogo');
 
-      if (dezenasSelecionadas.length !== 6) {
-        alert("Selecione exatamente 6 dezenas.");
-        return;
-      }
+        const confNomeCompleto = document.getElementById('conf-nome-completo');
+        const confNomeJogo = document.getElementById('conf-nome-jogo');
+        const confWhatsapp = document.getElementById('conf-whatsapp');
+        const confCidade = document.getElementById('conf-cidade');
+        const confDezenas = document.getElementById('conf-dezenas');
 
-      const preco = qtdJogos * 5;
-      resumo.innerHTML = `
-        Nome: ${nome}<br>
-        Qtde de Jogos: ${qtdJogos}<br>
-        Dezenas: ${dezenasSelecionadas.join(", ")}<br>
-        Total: R$${preco},00
-      `;
-      resumo.style.display = "block";
-      btnFinalizar.style.display = "block";
-    }
+        const telaNovoCadastro = document.getElementById('tela-novo-cadastro');
+        const telaOpcoesJogo = document.getElementById('tela-opcoes-jogo');
+        const telaCadastroDezenas = document.getElementById('tela-cadastro-dezenas');
+        const telaConfirmacao = document.getElementById('tela-confirmacao');
+        const telaAgradecimento = document.getElementById('tela-agradecimento');
+        const telaFinalizacao = document.getElementById('tela-finalizacao');
 
-    function enviarParaPlanilha() {
-      const nome = document.getElementById("nome").value.trim();
-      const qtdJogos = document.getElementById("qtdJogos").value;
-      const dezenasSelecionadas = Array.from(document.querySelectorAll(".dezena-btn.selecionado"))
-        .map(el => el.textContent);
-      const preco = qtdJogos * 5;
+        let dezenasSelecionadas = [];
 
-      fetch('https://script.google.com/macros/s/SEU_ID_DO_SCRIPT/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          nome,
-          jogos: qtdJogos,
-          dezenas: dezenasSelecionadas.join(", "),
-          total: `R$${preco},00`
-        })
-      }).then(() => {
-        alert("Dados enviados com sucesso!");
-        location.reload();
-      }).catch(() => alert("Erro ao enviar!"));
-    }
-  </script>
+        // Simulação de participantes anteriores (para a lógica da primeira etapa)
+        const participantesAnteriores = ['João Silva', 'Maria Oliveira'];
+
+        function mostrarOpcoesJogo() {
+            const nome = nomeCompletoInput.value.trim();
+            if (nome) {
+                nomeParticipanteOpcoes.textContent = nome;
+                telaNovoCadastro.style.display = 'none';
+                if (participantesAnteriores.includes(nome)) {
+                    telaOpcoesJogo.style.display = 'block';
+                } else {
+                    mostrarTelaCadastroDezenas();
+                }
+            } else {
+                alert('Por favor, digite seu nome completo.');
+            }
+        }
+
+        function mostrarTelaFinalizacao() {
+            telaOpcoesJogo.style.display = 'none';
+            telaFinalizacao.style.display = 'block';
+        }
+
+        function mostrarTelaCadastroDezenas() {
+            telaOpcoesJogo.style.display = 'none';
+            telaCadastroDezenas.style.display = 'block';
+            gerarTabelaDezenas();
+        }
+
+        function gerarTabelaDezenas() {
+            let tabelaHTML = '';
+            for (let i = 1; i <= 60; i += 10) {
+                tabelaHTML += '<tr>';
+                for (let j = i; j < i + 10; j++) {
+                    const dezena = j.toString().padStart(2, '0');
+                    tabelaHTML += `<td data-dezena="${dezena}" onclick="selecionarDezena(this)">${dezena}</td>`;
+                }
+                tabelaHTML += '</tr>';
+            }
+            dezenaTable.querySelector('tbody').innerHTML = tabelaHTML;
+        }
+
+        function selecionarDezena(td) {
+            const dezena = td.dataset.dezena;
+            const index = dezenasSelecionadas.indexOf(dezena);
+
+            if (index === -1) {
+                if (dezenasSelecionadas.length < 10) {
+                    dezenasSelecionadas.push(dezena);
+                    td.classList.add('selected');
+                } else {
+                    alert('Você já selecionou 10 dezenas.');
+                }
+            } else {
+                dezenasSelecionadas.splice(index, 1);
+                td.classList.remove('selected');
+            }
+
+            contadorDezenas.textContent = `Dezenas selecionadas: ${dezenasSelecionadas.length} / 10`;
+            btnConfirmarJogo.disabled = dezenasSelecionadas.length !== 10;
+        }
+
+        function confirmarJogo() {
+            if (dezenasSelecionadas.length === 10) {
+                confNomeCompleto.textContent = nomeCompletoInput.value;
+                confNomeJogo.textContent = nomeJogoInput.value || 'Não informado';
+                confWhatsapp.textContent = whatsappInput.value;
+                confCidade.textContent = cidadeInput.value;
+                confDezenas.textContent = dezenasSelecionadas.sort().join(', ');
+
+                telaCadastroDezenas.style.display = 'none';
+                telaConfirmacao.style.display = 'block';
+            } else {
+                alert('Por favor, selecione 10 dezenas.');
+            }
+        }
+
+        function enviarParaPlanilha() {
+            // *** IMPORTANTE: Esta função não enviará diretamente para o Google Sheets. ***
+            // *** Para isso, seria necessário um backend (Google Apps Script, etc.). ***
+            // *** Aqui, apenas simulamos o envio e mostramos a tela de agradecimento. ***
+
+            console.log('Dados a serem enviados (simulação):');
+            console.log('Nome Completo:', nomeCompletoInput.value);
+            console.log('Nome no Jogo:', nomeJogoInput.value);
+            console.log('WhatsApp:', whatsappInput.value);
+            console.log('Cidade:', cidadeInput.value);
+            console.log('Dezenas:', dezenasSelecionadas);
+
+            telaConfirmacao.style.display = 'none';
+            telaAgradecimento.style.display = 'block';
+
+            // Limpar os campos para um novo cadastro
+            nomeCompletoInput.value = '';
+            nomeJogoInput.value = '';
+            whatsappInput.value = '';
+            cidadeInput.value = '';
+            dezenasSelecionadas = [];
+            contadorDezenas.textContent = 'Dezenas selecionadas: 0 / 10';
+            btnConfirmarJogo.disabled = true;
+            const tds = dezenaTable.querySelectorAll('td.selected');
+            tds.forEach(td => td.classList.remove('selected'));
+        }
+
+        function voltarParaCadastro() {
+            telaConfirmacao.style.display = 'none';
+            telaCadastroDezenas.style.display = 'block';
+        }
+
+        function voltarParaInicio() {
+            telaAgradecimento.style.display = 'none';
+            telaFinalizacao.style.display = 'none';
+            telaNovoCadastro.style.display = 'block';
+        }
+    </script>
 </body>
 </html>
