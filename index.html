@@ -1,96 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cadastro no Bolão</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            text-align: center;
-            margin: 50px;
-        }
-        .container {
-            max-width: 400px;
-            margin: auto;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-        }
-        input {
-            width: 100%;
-            padding: 10px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-        }
-        button {
-            background-color: #28a745;
-            color: white;
-            border: none;
-            padding: 10px;
-            width: 100%;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-        button:hover {
-            background-color: #218838;
-        }
-        .loading {
-            display: none;
-            margin-top: 10px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadastro no Bolão</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(135deg, #25d366, #128C7E);
+      color: #fff;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #ffd700;
+    }
+    form {
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      color: #fff;
+    }
+    input, button {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 8px;
+    }
+    button {
+      background-color: #ffd700;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    #loading {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+    }
+    #loading img {
+      width: 30px;
+    }
+    #mensagem {
+      text-align: center;
+      margin-top: 10px;
+    }
+  </style>
 </head>
 <body>
-    <div class="container">
-        <h2>Cadastro no Bolão</h2>
-        <input type="text" id="nome" placeholder="Nome Completo">
-        <input type="text" id="planilha" placeholder="Nome da Planilha">
-        <input type="text" id="whats" placeholder="WhatsApp">
-        <input type="text" id="cidade" placeholder="Cidade">
-        <input type="text" id="dezenas" placeholder="Dezenas escolhidas">
-        <button id="btnEnviar">Confirmar Envio</button>
-        <p class="loading">🔄 Enviando...</p>
-        <div id="mensagem"></div>
-    </div>
-    
-    <script>
-        document.getElementById("btnEnviar").addEventListener("click", async () => {
-            const dados = {
-                Nome: document.getElementById("nome").value,
-                NomePlanilha: document.getElementById("planilha").value,
-                WhatsApp: document.getElementById("whats").value,
-                Cidade: document.getElementById("cidade").value,
-                Dezenas: document.getElementById("dezenas").value
-            };
+  <h1>Cadastro no Bolão</h1>
+  <form id="formulario">
+    <label for="nome">Nome completo:</label>
+    <input type="text" id="nome" name="Nome" required>
 
-            console.log("Dados para envio:", dados);
-            document.querySelector(".loading").style.display = "block";
-            document.getElementById("mensagem").innerHTML = "";
-            
-            try {
-                const response = await fetch("https://script.google.com/macros/s/AKfycbxKQ_HfYzy83khhhjHtVrQylGdHd3H-i7f6-Y8ZNKx0tSJuuZYF9_EDxTd19-F7eycB/exec", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(dados)
-                });
-                const responseData = await response.text();
-                console.log("Resposta do servidor:", responseData);
-                
-                if (response.ok) {
-                    document.getElementById("mensagem").innerHTML = "<h3 style='color: green;'>✅ Cadastro enviado com sucesso!</h3>";
-                } else {
-                    document.getElementById("mensagem").innerHTML = "<h3 style='color: red;'>❌ Erro ao enviar os dados. Tente novamente.</h3>";
-                }
-            } catch (error) {
-                document.getElementById("mensagem").innerHTML = "<h3 style='color: red;'>⚠️ Erro de conexão. Tente novamente.</h3>";
-                console.error("Erro na requisição:", error);
-            } finally {
-                document.querySelector(".loading").style.display = "none";
-            }
-        });
-    </script>
-</body>
-</html>
+    <label for="nomePlanilha">Nome para Planilha:</label>
+    <input type="text" id="nomePlanilha" name="NomePlanilha" required>
+
+    <label for="whatsapp">WhatsApp:</label>
+    <input type="text" id="whatsapp" name="WhatsApp" required>
+
+    <label for="cidade">Cidade:</label>
+    <input type="text" id="cidade" name="Cidade" required>
+
+    <label for="dezenas">Dezenas (separadas por vírgula):</label>
+    <input type="text" id="dezenas" name="Dezenas" required>
+
+    <button type="submit">Confirmar Cadastro</button>
+    <div id="loading"><img src="https://i.gifer.com/ZZ5H.gif" alt="Carregando..."></div>
+  </form>
+  <div id="mensagem"></div>
+
+  <script>
+    const form = document.getElementById('formulario');
+    const loading = document.getElementById('loading');
+    const mensagem = document.getElementById('mensagem');
+
+    form.addEventListener('
