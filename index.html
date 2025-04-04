@@ -65,6 +65,25 @@
     #loading img {
       width: 30px;
     }
+    #confirmacao {
+      display: none;
+      text-align: center;
+      background: #000000aa;
+      padding: 20px;
+      border-radius: 15px;
+      margin-top: 20px;
+    }
+    #confirmacao p {
+      margin: 5px 0;
+    }
+    #btn-voltar {
+      background-color: #fff;
+      color: #128C7E;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
@@ -90,11 +109,24 @@
     <div id="loading"><img src="https://i.gifer.com/ZZ5H.gif" alt="Carregando..." /></div>
   </form>
 
+  <div id="confirmacao">
+    <h2>Confira seus dados:</h2>
+    <p><strong>Nome:</strong> <span id="confNome"></span></p>
+    <p><strong>Nome para Planilha:</strong> <span id="confPlanilha"></span></p>
+    <p><strong>WhatsApp:</strong> <span id="confWhats"></span></p>
+    <p><strong>Cidade:</strong> <span id="confCidade"></span></p>
+    <p><strong>Dezenas:</strong> <span id="confDezenas"></span></p>
+    <button id="btn-voltar">Confirmar Envio</button>
+  </div>
+
   <script>
     const dezenasDiv = document.getElementById("dezenas");
     const contador = document.getElementById("contador");
     const form = document.getElementById("formulario");
     const loading = document.getElementById("loading");
+    const confirmacao = document.getElementById("confirmacao");
+    const btnVoltar = document.getElementById("btn-voltar");
+
     let dezenasSelecionadas = [];
 
     for (let i = 1; i <= 60; i++) {
@@ -117,20 +149,30 @@
       contador.textContent = `Dezenas escolhidas: ${dezenasSelecionadas.length}/10`;
     }
 
-    form.addEventListener("submit", async (e) => {
+    form.addEventListener("submit", (e) => {
       e.preventDefault();
-
       if (dezenasSelecionadas.length !== 10) {
         alert("Você precisa escolher exatamente 10 dezenas.");
         return;
       }
 
+      document.getElementById("confNome").textContent = document.getElementById("nome").value;
+      document.getElementById("confPlanilha").textContent = document.getElementById("nomePlanilha").value;
+      document.getElementById("confWhats").textContent = document.getElementById("whatsapp").value;
+      document.getElementById("confCidade").textContent = document.getElementById("cidade").value;
+      document.getElementById("confDezenas").textContent = dezenasSelecionadas.map(d => d.toString().padStart(2, "0")).join(", ");
+
+      form.style.display = "none";
+      confirmacao.style.display = "block";
+    });
+
+    btnVoltar.addEventListener("click", async () => {
       const dados = {
-        nome: document.getElementById("nome").value,
-        nomePlanilha: document.getElementById("nomePlanilha").value,
-        whatsapp: document.getElementById("whatsapp").value,
-        cidade: document.getElementById("cidade").value,
-        dezenas: dezenasSelecionadas.join(", ")
+        nome: document.getElementById("confNome").textContent,
+        nomePlanilha: document.getElementById("confPlanilha").textContent,
+        whatsapp: document.getElementById("confWhats").textContent,
+        cidade: document.getElementById("confCidade").textContent,
+        dezenas: document.getElementById("confDezenas").textContent
       };
 
       try {
@@ -147,11 +189,13 @@
           dezenasSelecionadas = [];
           document.querySelectorAll(".grid button").forEach(b => b.classList.remove("selected"));
           contador.textContent = "Dezenas escolhidas: 0/10";
+          confirmacao.style.display = "none";
+          form.style.display = "block";
         } else {
-          alert("Erro ao enviar. Tente novamente.");
+          alert("Erro ao enviar cadastro. Tente novamente mais tarde.");
         }
       } catch (error) {
-        alert("Erro de conexão. Verifique sua internet e tente novamente.");
+        alert("Erro de conexão. Tente novamente mais tarde.");
       } finally {
         loading.style.display = "none";
       }
@@ -159,4 +203,3 @@
   </script>
 </body>
 </html>
-
