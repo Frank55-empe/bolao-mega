@@ -47,51 +47,72 @@
     }
 
     function gerarJogos() {
-      const nome = document.getElementById("nome").value.trim();
-      const qtdJogos = parseInt(document.getElementById("quantidade").value);
-      const preco = qtdJogos * 5;
-      const resumo = document.getElementById("resumo");
-      const planilha = document.getElementById("planilha").querySelector("tbody");
+  const nome = document.getElementById("nome").value.trim();
+  const qtdJogos = parseInt(document.getElementById("quantidade").value);
+  const preco = qtdJogos * 5;
+  const resumo = document.getElementById("resumo");
+  const planilha = document.getElementById("planilha").querySelector("tbody");
 
-      if (!nome || isNaN(qtdJogos) || qtdJogos <= 0) {
-        alert("Preencha o nome e a quantidade corretamente.");
-        return;
-      }
+  if (!nome || isNaN(qtdJogos) || qtdJogos <= 0) {
+    alert("Preencha o nome e a quantidade corretamente.");
+    return;
+  }
 
-      planilha.innerHTML = "";
-      let todasAsDezenas = [];
+  planilha.innerHTML = "";
+  let todasAsDezenas = [];
 
-      for (let i = 0; i < qtdJogos; i++) {
-        const dezenas = gerarDezenas();
-        todasAsDezenas.push(dezenas);
-        const linha = `<tr>
-          <td>${nome}</td>
-          <td>Jogo ${i + 1}</td>
-          <td>${dezenas.join(", ")}</td>
-        </tr>`;
-        planilha.innerHTML += linha;
-      }
+  for (let i = 0; i < qtdJogos; i++) {
+    const dezenas = gerarDezenas();
+    todasAsDezenas.push(dezenas);
+    const linha = `<tr>
+      <td>${nome}</td>
+      <td>Jogo ${i + 1}</td>
+      <td>${dezenas.join(", ")}</td>
+    </tr>`;
+    planilha.innerHTML += linha;
+  }
 
-      // Mostrar resumo com chave PIX e botão de cópia
-      resumo.innerHTML = `
-        ✅ <strong>Confirmação do Pedido:</strong><br>
-        👤 <strong>Nome:</strong> ${nome}<br>
-        🎲 <strong>Jogos:</strong> ${qtdJogos}<br>
-        🔢 <strong>Dezenas:</strong> ${todasAsDezenas.map(d => d.join(", ")).join(" | ")}<br>
-        💰 <strong>Valor Total:</strong> <span style="color:green">R$${preco},00</span><br><br>
+  // Enviar para Google Sheets via POST
+  const url = "https://script.google.com/macros/s/SEU-LINK-AQUI/exec"; // substitua pelo link do Google Script
 
-        <strong>🔔 Agora é só fazer o PIX para confirmar sua participação no bolão:</strong><br>
-        📲 <strong>Chave PIX:</strong> <span id="chavePix">seuemail@pix.com</span> 
-        <button onclick="copiarPix()">📋 Copiar PIX</button><br><br>
-
-        🧠 <em>“A sorte acompanha quem toma atitude.”</em><br>
-        ✅ Seu nome será inserido na planilha oficial após o pagamento.<br>
-        ⏳ <strong>Vagas limitadas!</strong> Garanta seu lugar agora e concorra a milhões!<br><br>
-
-        ⚠️ Após o pagamento, envie o comprovante no WhatsApp:<br>
-        <a href="https://wa.me/5599999999999" target="_blank">📲 Enviar Comprovante</a>
-      `;
+  fetch(url, {
+    method: "POST",
+    body: JSON.stringify({
+      nome: nome,
+      jogos: todasAsDezenas
+    }),
+    headers: {
+      "Content-Type": "application/json"
     }
+  })
+  .then(response => response.text())
+  .then(data => {
+    console.log("Dados enviados para planilha: " + data);
+  })
+  .catch(error => {
+    console.error("Erro ao enviar para planilha:", error);
+  });
+
+  resumo.innerHTML = `
+    ✅ <strong>Confirmação do Pedido:</strong><br>
+    👤 <strong>Nome:</strong> ${nome}<br>
+    🎲 <strong>Jogos:</strong> ${qtdJogos}<br>
+    🔢 <strong>Dezenas:</strong> ${todasAsDezenas.map(d => d.join(", ")).join(" | ")}<br>
+    💰 <strong>Valor Total:</strong> <span style="color:green">R$${preco},00</span><br><br>
+
+    <strong>🔔 Agora é só fazer o PIX para confirmar sua participação no bolão:</strong><br>
+    📲 <strong>Chave PIX:</strong> <span id="chavePix">seuemail@pix.com</span> 
+    <button onclick="copiarPix()">📋 Copiar PIX</button><br><br>
+
+    🧠 <em>“A sorte acompanha quem toma atitude.”</em><br>
+    ✅ Seu nome será inserido na planilha oficial após o pagamento.<br>
+    ⏳ <strong>Vagas limitadas!</strong> Garanta seu lugar agora e concorra a milhões!<br><br>
+
+    ⚠️ Após o pagamento, envie o comprovante no WhatsApp:<br>
+    <a href="https://wa.me/5599999999999" target="_blank">📲 Enviar Comprovante</a>
+  `;
+}
+
 
     function copiarPix() {
       const texto = document.getElementById("chavePix").textContent;
