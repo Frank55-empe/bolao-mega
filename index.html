@@ -1,139 +1,136 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Bolão da Mega Positivo</title>
   <style>
     body {
       font-family: Arial, sans-serif;
-      background: linear-gradient(to bottom, #0b6623, #ffd700);
+      background: linear-gradient(135deg, #25d366, #128C7E);
       color: #fff;
       padding: 20px;
-      max-width: 600px;
-      margin: auto;
     }
     h1 {
       text-align: center;
       color: #ffd700;
     }
+    form {
+      background-color: rgba(0, 0, 0, 0.2);
+      padding: 20px;
+      border-radius: 15px;
+      max-width: 500px;
+      margin: 0 auto;
+    }
     label {
       display: block;
-      margin-top: 15px;
-      font-weight: bold;
+      margin: 10px 0 5px;
+      color: #fff;
     }
     input, select, button {
       width: 100%;
       padding: 10px;
-      margin-top: 5px;
+      margin-bottom: 15px;
       border: none;
-      border-radius: 5px;
-      font-size: 1em;
+      border-radius: 8px;
     }
-    input[type="number"] {
-      width: 60px;
-      display: inline-block;
-      margin: 5px;
-    }
-    .dezena-box {
-      display: flex;
-      flex-wrap: wrap;
-      justify-content: center;
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
       gap: 5px;
       margin-top: 10px;
     }
-    .dezena-box input[type="checkbox"] {
-      display: none;
-    }
-    .dezena-box label {
-      background: #fff;
-      color: #0b6623;
-      padding: 10px;
-      border-radius: 50%;
-      width: 45px;
-      text-align: center;
-      cursor: pointer;
+    .grid button {
+      background-color: #fff;
+      color: #000;
       font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
     }
-    .dezena-box input[type="checkbox"]:checked + label {
+    .grid button.selected {
       background-color: #ffd700;
       color: #000;
     }
-    #mensagemErro {
-      color: #ff0000;
-      font-weight: bold;
-      margin-top: 10px;
+    #contador {
       text-align: center;
+      font-size: 18px;
+      margin-top: 10px;
+      color: #ffd700;
     }
   </style>
 </head>
 <body>
   <h1>Bolão da Mega Positivo<br>(Bar do Enoquis)</h1>
-
   <form id="formulario">
-    <label for="nome">Nome completo do participante</label>
-    <input type="text" id="nome" required>
+    <label for="nome">Nome completo:</label>
+    <input type="text" id="nome" required />
 
-    <label for="nomePlanilha">Nome que vai na planilha</label>
-    <input type="text" id="nomePlanilha" required>
+    <label for="nomePlanilha">Nome para Planilha:</label>
+    <input type="text" id="nomePlanilha" required />
 
-    <label for="whatsapp">Número do WhatsApp</label>
-    <input type="text" id="whatsapp" required>
+    <label for="whatsapp">WhatsApp:</label>
+    <input type="text" id="whatsapp" required />
 
-    <label for="cidade">Cidade</label>
-    <input type="text" id="cidade" required>
+    <label for="cidade">Cidade:</label>
+    <input type="text" id="cidade" required />
 
     <label>Escolha 10 dezenas:</label>
-    <div class="dezena-box" id="dezenas">
-      <!-- dezenas de 01 a 60 -->
-    </div>
-
-    <div id="mensagemErro"></div>
+    <div id="dezenas" class="grid"></div>
+    <div id="contador">Dezenas escolhidas: 0/10</div>
 
     <button type="submit">Confirmar Cadastro</button>
   </form>
 
   <script>
-    const dezenasContainer = document.getElementById('dezenas');
-    const mensagemErro = document.getElementById('mensagemErro');
+    const dezenasDiv = document.getElementById("dezenas");
+    const contador = document.getElementById("contador");
+    const form = document.getElementById("formulario");
+    let dezenasSelecionadas = [];
 
     for (let i = 1; i <= 60; i++) {
-      const checkbox = document.createElement('input');
-      checkbox.type = 'checkbox';
-      checkbox.id = `dezena${i}`;
-      checkbox.value = i < 10 ? '0' + i : i;
-
-      const label = document.createElement('label');
-      label.htmlFor = `dezena${i}`;
-      label.textContent = checkbox.value;
-
-      dezenasContainer.appendChild(checkbox);
-      dezenasContainer.appendChild(label);
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = i.toString().padStart(2, "0");
+      btn.addEventListener("click", () => selecionarDezena(i, btn));
+      dezenasDiv.appendChild(btn);
     }
 
-    const form = document.getElementById('formulario');
-    form.addEventListener('submit', function (e) {
-      e.preventDefault();
-      const selecionadas = [...document.querySelectorAll('input[type="checkbox"]:checked')];
-
-      if (selecionadas.length !== 10) {
-        mensagemErro.textContent = `Você precisa escolher exatamente 10 dezenas. Faltam ${10 - selecionadas.length}`;
-        return;
+    function selecionarDezena(numero, btn) {
+      if (dezenasSelecionadas.includes(numero)) {
+        dezenasSelecionadas = dezenasSelecionadas.filter(d => d !== numero);
+        btn.classList.remove("selected");
       } else {
-        mensagemErro.textContent = '';
+        if (dezenasSelecionadas.length >= 10) return;
+        dezenasSelecionadas.push(numero);
+        btn.classList.add("selected");
+      }
+      contador.textContent = `Dezenas escolhidas: ${dezenasSelecionadas.length}/10`;
+    }
+
+    form.addEventListener("submit", (e) => {
+      e.preventDefault();
+
+      if (dezenasSelecionadas.length !== 10) {
+        alert("Você precisa escolher exatamente 10 dezenas.");
+        return;
       }
 
       const dados = {
-        nome: document.getElementById('nome').value,
-        nomePlanilha: document.getElementById('nomePlanilha').value,
-        whatsapp: document.getElementById('whatsapp').value,
-        cidade: document.getElementById('cidade').value,
-        dezenas: selecionadas.map(d => d.value).join(', ')
+        nome: document.getElementById("nome").value,
+        nomePlanilha: document.getElementById("nomePlanilha").value,
+        whatsapp: document.getElementById("whatsapp").value,
+        cidade: document.getElementById("cidade").value,
+        dezenas: dezenasSelecionadas.join(", ")
       };
 
-      alert('Cadastro enviado com sucesso!');
-      console.log(dados);
-      // Aqui você fará a conexão com o Google Sheets via Apps Script ou backend
+      console.log("Dados enviados:", dados);
+      alert("Cadastro enviado com sucesso!");
+
+      // Limpar tudo após o envio
+      form.reset();
+      dezenasSelecionadas = [];
+      document.querySelectorAll(".grid button").forEach(b => b.classList.remove("selected"));
+      contador.textContent = "Dezenas escolhidas: 0/10";
     });
   </script>
 </body>
