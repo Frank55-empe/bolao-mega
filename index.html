@@ -2,125 +2,76 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8">
-  <title>Bolão da Sorte</title>
+  <title>Bolão da Mega-Sena</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f2f2f2; padding: 20px; }
-    label, input, button, select { display: block; margin-bottom: 10px; }
-    table, th, td { border: 1px solid black; border-collapse: collapse; padding: 5px; }
-    table { margin-top: 20px; width: 100%; }
-    #resumo { margin-top: 20px; background: #e0ffe0; padding: 15px; border-radius: 10px; }
-    button { padding: 10px; cursor: pointer; background-color: #4CAF50; color: white; border: none; border-radius: 5px; }
+    body { font-family: Arial, sans-serif; padding: 20px; }
+    .dezenas { display: grid; grid-template-columns: repeat(10, 1fr); gap: 5px; margin-top: 10px; }
+    .dezenas label { display: flex; align-items: center; justify-content: center; background: #f0f0f0; padding: 10px; border-radius: 5px; cursor: pointer; }
+    .dezenas input { display: none; }
+    .dezenas input:checked + span { background: #4caf50; color: #fff; font-weight: bold; }
+    .resumo { margin-top: 20px; border: 1px solid #ccc; padding: 15px; border-radius: 10px; }
+    button { margin-top: 20px; padding: 10px 20px; background: #4caf50; color: #fff; border: none; border-radius: 5px; cursor: pointer; }
   </style>
 </head>
 <body>
+  <h1>Participe do Bolão da Mega-Sena</h1>
+  <form id="formulario">
+    <label>Nome Completo: <input type="text" id="nomeCompleto" required></label><br><br>
+    <label>Nome a colocar no jogo: <input type="text" id="nomeJogo" required></label><br><br>
+    <label>WhatsApp: <input type="text" id="whatsapp" required></label><br><br>
 
-  <h2>🎯 Participe do Bolão da Sorte!</h2>
+    <h3>Escolha 10 dezenas:</h3>
+    <div class="dezenas" id="dezenasContainer"></div>
 
-  <label for="nome">Nome a colocar no jogo:</label>
-  <input type="text" id="nome" required>
+    <button type="submit">Enviar</button>
+  </form>
 
-  <label for="quantidade">Quantidade de jogos:</label>
-  <input type="number" id="quantidade" min="1" required>
-
-  <button onclick="gerarJogos()">Gerar Jogos</button>
-
-  <div id="resumo"></div>
-
-  <table id="planilha">
-    <thead>
-      <tr>
-        <th>Nome</th>
-        <th>Jogo</th>
-        <th>Dezenas</th>
-      </tr>
-    </thead>
-    <tbody></tbody>
-  </table>
+  <div id="resumo" class="resumo" style="display: none;"></div>
 
   <script>
-    function gerarDezenas() {
-      const dezenas = new Set();
-      while (dezenas.size < 6) {
-        dezenas.add(String(Math.floor(Math.random() * 60 + 1)).padStart(2, '0'));
+    const dezenasContainer = document.getElementById('dezenasContainer');
+    for (let i = 1; i <= 60; i++) {
+      const label = document.createElement('label');
+      const checkbox = document.createElement('input');
+      checkbox.type = 'checkbox';
+      checkbox.value = i < 10 ? '0' + i : i;
+      checkbox.name = 'dezena';
+      const span = document.createElement('span');
+      span.textContent = checkbox.value;
+      label.appendChild(checkbox);
+      label.appendChild(span);
+      dezenasContainer.appendChild(label);
+    }
+
+    document.getElementById('formulario').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const nomeCompleto = document.getElementById('nomeCompleto').value;
+      const nomeJogo = document.getElementById('nomeJogo').value;
+      const whatsapp = document.getElementById('whatsapp').value;
+      const dezenasSelecionadas = Array.from(document.querySelectorAll('input[name="dezena"]:checked')).map(el => el.value);
+
+      if (dezenasSelecionadas.length !== 10) {
+        alert('Você deve selecionar exatamente 10 dezenas.');
+        return;
       }
-      return Array.from(dezenas).sort((a, b) => a - b);
-    }
 
-    function gerarJogos() {
-  const nome = document.getElementById("nome").value.trim();
-  const qtdJogos = parseInt(document.getElementById("quantidade").value);
-  const preco = qtdJogos * 5;
-  const resumo = document.getElementById("resumo");
-  const planilha = document.getElementById("planilha").querySelector("tbody");
+      const resumo = document.getElementById('resumo');
+      resumo.style.display = 'block';
+      resumo.innerHTML = `
+        <h2>Confirme seus dados:</h2>
+        <p><strong>Nome Completo:</strong> ${nomeCompleto}</p>
+        <p><strong>Nome no Jogo:</strong> ${nomeJogo}</p>
+        <p><strong>WhatsApp:</strong> ${whatsapp}</p>
+        <p><strong>Dezenas Escolhidas:</strong> ${dezenasSelecionadas.join(', ')}</p>
+        <h3>Valor: <strong>R$ 35,00</strong></h3>
+        <p>Chave PIX para pagamento: <strong>tel: 35991717912</strong></p>
+        <p>⚠️ Após o pagamento, envie o comprovante para o WhatsApp informado para confirmar sua participação!</p>
+        <p style="margin-top: 10px; color: green; font-weight: bold;">Garanta sua chance de ganhar com um jogo estratégico de 10 dezenas! Vagas limitadas!</p>
+      `;
 
-  if (!nome || isNaN(qtdJogos) || qtdJogos <= 0) {
-    alert("Preencha o nome e a quantidade corretamente.");
-    return;
-  }
-
-  planilha.innerHTML = "";
-  let todasAsDezenas = [];
-
-  for (let i = 0; i < qtdJogos; i++) {
-    const dezenas = gerarDezenas();
-    todasAsDezenas.push(dezenas);
-    const linha = `<tr>
-      <td>${nome}</td>
-      <td>Jogo ${i + 1}</td>
-      <td>${dezenas.join(", ")}</td>
-    </tr>`;
-    planilha.innerHTML += linha;
-  }
-
-  // Enviar para Google Sheets via POST
-  const url = "https://script.google.com/macros/s/SEU-LINK-AQUI/exec"; // substitua pelo link do Google Script
-
-  fetch(url, {
-    method: "POST",
-    body: JSON.stringify({
-      nome: nome,
-      jogos: todasAsDezenas
-    }),
-    headers: {
-      "Content-Type": "application/json"
-    }
-  })
-  .then(response => response.text())
-  .then(data => {
-    console.log("Dados enviados para planilha: " + data);
-  })
-  .catch(error => {
-    console.error("Erro ao enviar para planilha:", error);
-  });
-
-  resumo.innerHTML = `
-    ✅ <strong>Confirmação do Pedido:</strong><br>
-    👤 <strong>Nome:</strong> ${nome}<br>
-    🎲 <strong>Jogos:</strong> ${qtdJogos}<br>
-    🔢 <strong>Dezenas:</strong> ${todasAsDezenas.map(d => d.join(", ")).join(" | ")}<br>
-    💰 <strong>Valor Total:</strong> <span style="color:green">R$${preco},00</span><br><br>
-
-    <strong>🔔 Agora é só fazer o PIX para confirmar sua participação no bolão:</strong><br>
-    📲 <strong>Chave PIX:</strong> <span id="chavePix">seuemail@pix.com</span> 
-    <button onclick="copiarPix()">📋 Copiar PIX</button><br><br>
-
-    🧠 <em>“A sorte acompanha quem toma atitude.”</em><br>
-    ✅ Seu nome será inserido na planilha oficial após o pagamento.<br>
-    ⏳ <strong>Vagas limitadas!</strong> Garanta seu lugar agora e concorra a milhões!<br><br>
-
-    ⚠️ Após o pagamento, envie o comprovante no WhatsApp:<br>
-    <a href="https://wa.me/5599999999999" target="_blank">📲 Enviar Comprovante</a>
-  `;
-}
-
-
-    function copiarPix() {
-      const texto = document.getElementById("chavePix").textContent;
-      navigator.clipboard.writeText(texto).then(() => {
-        alert("✅ Chave PIX copiada com sucesso!");
-      });
-    }
+      // Aqui poderia ser feita a integração com planilha (ex: via Google Apps Script) ou backend
+    });
   </script>
-
 </body>
 </html>
