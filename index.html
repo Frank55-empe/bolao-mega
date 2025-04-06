@@ -1,3 +1,4 @@
+<!-- CÓDIGO CORRIGIDO -->
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
@@ -98,10 +99,10 @@
     <input type="text" id="nomeparajogo" required />
 
     <label for="whatsapp">WhatsApp:</label>
-    <input type="text" id="confWhatsapp" required />
+    <input type="text" id="whatsapp" required />
 
     <label for="cidade">Cidade:</label>
-    <input type="text" id="confcidade" required />
+    <input type="text" id="cidade" required />
 
     <label>Escolha 10 dezenas:</label>
     <div id="dezenas" class="grid"></div>
@@ -160,11 +161,11 @@
 
       document.getElementById("confnome").textContent = document.getElementById("nome").value;
       document.getElementById("confnomeparajogo").textContent = document.getElementById("nomeparajogo").value;
-      document.getElementById("confWhatsapp").textContent = document.getElementById("Whatsapp").value;
+      document.getElementById("confWhatsapp").textContent = document.getElementById("whatsapp").value;
       document.getElementById("confcidade").textContent = document.getElementById("cidade").value;
       document.getElementById("confdezenas").textContent = dezenasSelecionadas.map(d => d.toString().padStart(2, "0")).join(", ");
 
-      form.style.display = "nonecompleto";
+      form.style.display = "none";
       confirmacao.style.display = "block";
     });
 
