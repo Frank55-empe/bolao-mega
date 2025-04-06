@@ -1,54 +1,94 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Bolão da Mega</title>
-  <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #e0ffe0; }
-    form { background: #fff; padding: 20px; border-radius: 8px; max-width: 400px; margin: auto; }
-    label, input, textarea { display: block; width: 100%; margin-bottom: 10px; }
-    button { padding: 10px; background: green; color: white; border: none; cursor: pointer; }
-  </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MegaPositivo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-  <h2>Cadastro no Bolão da Mega</h2>
-  <form id="bolaoForm">
-    <label>Nome:</label>
-    <input type="text" name="nome" required>
-    
-    <label>Número do Jogo:</label>
-    <input type="text" name="njogo" required>
-    
-    <label>WhatsApp:</label>
-    <input type="text" name="whatsapp" required>
-    
-    <label>Cidade:</label>
-    <input type="text" name="cidade" required>
-    
-    <label>Dezenas (separadas por vírgula):</label>
-    <textarea name="dezenas" required></textarea>
-    
-    <button type="submit">Enviar</button>
-  </form>
+<body class="bg-gray-100 p-4">
+  <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
+    <h1 class="text-2xl font-bold mb-4 text-center">Cadastro MegaPositivo</h1>
+    <form id="megaForm" class="space-y-4">
+      <input type="text" name="nome" placeholder="Nome Completo" required class="w-full border p-2 rounded">
+      <input type="tel" name="whatsapp" placeholder="Número do WhatsApp" required class="w-full border p-2 rounded">
+      <input type="text" name="cidade" placeholder="Cidade" required class="w-full border p-2 rounded">
+      <input type="text" name="planilha_nome" placeholder="Nome que vai na planilha" required class="w-full border p-2 rounded">
+      
+      <div class="mt-4">
+        <h2 class="font-semibold mb-2">Escolha 10 dezenas:</h2>
+        <div id="dezenasContainer" class="grid grid-cols-6 gap-2"></div>
+        <p id="msg" class="text-sm text-red-500 mt-2 hidden">Você deve escolher exatamente 10 dezenas.</p>
+      </div>
+
+      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">Enviar</button>
+    </form>
+    <p id="sucesso" class="text-green-600 mt-4 hidden">Cadastro enviado com sucesso!</p>
+  </div>
 
   <script>
-    const scriptURL = 'https://script.google.com/macros/s/AKfycbz4JoJJopz_YdoWjagziHDZkphjpccDGLpbkn9Q1gtlP__gpXNSqzNvTU28v7cSOgPr1w/exec';
-    const form = document.getElementById('bolaoForm');
+    const dezenasContainer = document.getElementById("dezenasContainer");
+    const msg = document.getElementById("msg");
+    const sucesso = document.getElementById("sucesso");
 
-    form.addEventListener('submit', e => {
-      e.preventDefault();
-      fetch(scriptURL, {
-        method: 'POST',
-        body: new FormData(form)
-      })
-      .then(response => {
-        alert('Dados enviados com sucesso!');
-        form.reset();
-      })
-      .catch(error => {
-        alert('Erro ao enviar os dados. Tente novamente.');
-        console.error('Erro:', error);
+    // Gerar os botões de dezenas
+    for (let i = 1; i <= 60; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = i.toString().padStart(2, "0");
+      btn.className = "bg-gray-200 hover:bg-blue-200 p-2 rounded";
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        btn.classList.toggle("bg-blue-500");
+        btn.classList.toggle("text-white");
+
+        const selecionados = document.querySelectorAll("#dezenasContainer .bg-blue-500");
+        if (selecionados.length > 10) {
+          btn.classList.remove("bg-blue-500", "text-white");
+          btn.classList.add("bg-gray-200");
+        }
+
+        msg.classList.toggle("hidden", selecionados.length === 10);
       });
+      dezenasContainer.appendChild(btn);
+    }
+
+    // Enviar dados
+    document.getElementById("megaForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const selecionados = Array.from(document.querySelectorAll("#dezenasContainer .bg-blue-500"))
+        .map(btn => btn.textContent);
+
+      if (selecionados.length !== 10) {
+        msg.classList.remove("hidden");
+        return;
+      }
+
+      const form = e.target;
+      const dados = {
+        nome: form.nome.value,
+        whatsapp: form.whatsapp.value,
+        cidade: form.cidade.value,
+        planilha_nome: form.planilha_nome.value,
+        dezenas: selecionados.join(", ")
+      };
+
+      try {
+        const res = await fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
+          method: "POST",
+          body: new URLSearchParams(dados)
+        });
+        if (res.ok) {
+          sucesso.classList.remove("hidden");
+          form.reset();
+          document.querySelectorAll("#dezenasContainer .bg-blue-500").forEach(btn => {
+            btn.classList.remove("bg-blue-500", "text-white");
+            btn.classList.add("bg-gray-200");
+          });
+        }
+      } catch (err) {
+        alert("Erro ao enviar. Tente novamente.");
+      }
     });
   </script>
 </body>
