@@ -92,10 +92,10 @@
   <h1>Bolão da Mega Positivo<br>(Bar do Enoquis)</h1>
   <form id="formulario">
     <label for="nome">Nome completo:</label>
-    <input type="text" id="nome" required />
+    <input type="text" id="nomecompleto" required />
 
-    <label for="nomePlanilha">Nome para Planilha:</label>
-    <input type="text" id="nomePlanilha" required />
+    <label for="nomeparajogo">Nome para jogo:</label>
+    <input type="text" id="nomeparajogo" required />
 
     <label for="whatsapp">WhatsApp:</label>
     <input type="text" id="whatsapp" required />
@@ -113,11 +113,11 @@
 
   <div id="confirmacao">
     <h2>Confira seus dados:</h2>
-    <p><strong>Nome:</strong> <span id="confNome"></span></p>
-    <p><strong>Nome para Planilha:</strong> <span id="confPlanilha"></span></p>
-    <p><strong>WhatsApp:</strong> <span id="confWhats"></span></p>
-    <p><strong>Cidade:</strong> <span id="confCidade"></span></p>
-    <p><strong>Dezenas:</strong> <span id="confDezenas"></span></p>
+    <p><strong>Nome completo:</strong> <span id="confnomecompleto"></span></p>
+    <p><strong>Nome para jogo:</strong> <span id="confparajogo"></span></p>
+    <p><strong>Whatsapp:</strong> <span id="confWhatsapp"></span></p>
+    <p><strong>cidade:</strong> <span id="confcidade"></span></p>
+    <p><strong>dezenas:</strong> <span id="confdezenas"></span></p>
     <button id="btn-voltar">Confirmar Envio</button>
   </div>
 
@@ -158,11 +158,11 @@
         return;
       }
 
-      document.getElementById("confNome").textContent = document.getElementById("nome").value;
-      document.getElementById("confPlanilha").textContent = document.getElementById("nomePlanilha").value;
-      document.getElementById("confWhats").textContent = document.getElementById("whatsapp").value;
-      document.getElementById("confCidade").textContent = document.getElementById("cidade").value;
-      document.getElementById("confDezenas").textContent = dezenasSelecionadas.map(d => d.toString().padStart(2, "0")).join(", ");
+      document.getElementById("confnomecompleto").textContent = document.getElementById("nomecompleto").value;
+      document.getElementById("confnomeparajogo").textContent = document.getElementById("nomeparajogo").value;
+      document.getElementById("confWhatsapp").textContent = document.getElementById("whatsapp").value;
+      document.getElementById("confcidade").textContent = document.getElementById("cidade").value;
+      document.getElementById("confdezenas").textContent = dezenasSelecionadas.map(d => d.toString().padStart(2, "0")).join(", ");
 
       form.style.display = "none";
       confirmacao.style.display = "block";
@@ -170,16 +170,16 @@
 
     btnVoltar.addEventListener("click", async () => {
       const dados = {
-        Nome: document.getElementById("confNome").textContent,
-        NomePlanilha: document.getElementById("confPlanilha").textContent,
-        WhatsApp: document.getElementById("confWhats").textContent,
-        Cidade: document.getElementById("confCidade").textContent,
-        Dezenas: document.getElementById("confDezenas").textContent
+        Nome: document.getElementById("confnome").textContent,
+        Nomeparajogo: document.getElementById("confnomeparajogo").textContent,
+        Whatsapp: document.getElementById("confWhatsapp").textContent,
+        cidade: document.getElementById("confcidade").textContent,
+        dezenas: document.getElementById("confdezenas").textContent
       };
 
       loading.style.display = "block";
       try {
-        const response = await fetch("https://script.google.com/macros/s/AKfycbxct64GeIbXuCxIEnyJM8De72cRw_LBAfEftYHUXBH0amI7YaZ6h8QbsO54qxiFeDLc/exec", {
+        const response = await fetch("https://script.google.com/macros/s/AKfycbwh6jm07XIuBBBnQ7bzHQWc25c0Bvgu0kHM_iGkUzj1aHG4nmQM13vPfLUThp2Shos/exec", {
           method: "POST",
           headers: {
             "Content-Type": "application/json"
@@ -198,3 +198,4 @@
   </script>
 </body>
 </html>
+
