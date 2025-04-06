@@ -1,182 +1,111 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bolão da Mega Positivo</title>
+  <title>Bolão da Sorte</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-    .hidden { display: none; }
-    .form-step { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
-    h2 { text-align: center; }
-    input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
-    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
-    .dezena { background: #ddd; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; }
-    .dezena.selected { background: green; color: white; }
-    .counter { text-align: center; margin: 10px 0; font-weight: bold; }
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input[type="number"] { width: 60px; margin: 3px; }
+    button { margin-top: 10px; padding: 10px 20px; }
+    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
+    table { margin-top: 20px; width: 100%; }
   </style>
 </head>
 <body>
 
-  <div id="etapa1" class="form-step">
-    <h2>Bem-vindo ao Bolão da Mega</h2>
-    <input type="text" id="nomeConsulta" placeholder="Digite seu nome completo">
-    <button onclick="consultarParticipante()">Avançar</button>
-  </div>
+  <h2>Bolão da Sorte - Escolha suas 10 dezenas</h2>
 
-  <div id="escolhaExistente" class="form-step hidden">
-    <h2>Cadastro encontrado</h2>
-    <button onclick="irParaResumo()">1 - Manter meu jogo</button>
-    <button onclick="irParaCadastro()">2 - Novo jogo</button>
-  </div>
+  <label for="nome">Nome a colocar no jogo:</label><br>
+  <input type="text" id="nome" placeholder="Ex: João da Sorte"><br><br>
 
-  <div id="formularioCadastro" class="form-step hidden">
-    <h2>Cadastro do Participante</h2>
-    <input type="text" id="nomeCompleto" placeholder="Nome Completo">
-    <input type="text" id="nomeJogo" placeholder="Nome que vai no jogo">
-    <input type="text" id="whatsapp" placeholder="WhatsApp">
-    <input type="text" id="cidade" placeholder="Cidade">
+  <label>Escolha suas 10 dezenas (entre 1 e 80):</label><br>
+  <div id="dezenas">
+    <!-- Campos para dezenas -->
+    <script>
+      for (let i = 1; i <= 10; i++) {
+        document.write(`<input type="number" id="dezena${i}" min="1" max="80" required>`);
+      }
+    </script>
+  </div><br>
 
-    <div class="counter" id="contador">0 de 10 dezenas selecionadas</div>
-    <div class="grid" id="dezenas"></div>
+  <button onclick="enviarJogo()">Confirmar Jogo</button>
 
-    <button id="btnConfirmarCadastro" class="hidden" onclick="mostrarResumo()">Confirmar Jogo</button>
-  </div>
-
-  <div id="resumoCadastro" class="form-step hidden">
-    <h2>Confirme seus dados</h2>
-    <div id="resumoDados"></div>
-    <button onclick="enviarDados()">Enviar Cadastro</button>
-    <button onclick="voltarParaEdicao()">Corrigir Dados</button>
-  </div>
-
-  <div id="agradecimento" class="form-step hidden">
-    <h2>Cadastro enviado!</h2>
-    <p>Obrigado por participar do bolão! Seu jogo está registrado.<br>
-    Efetue o pagamento via Pix:<br>
-    <strong>Chave Pix:</strong> 35991717912<br>
-    <strong>Nome:</strong> Frank de Souza Borges</p>
-    <button onclick="reiniciarCadastro()">Fazer novo cadastro</button>
-  </div>
+  <div id="resumo" style="margin-top: 30px;"></div>
 
   <script>
-    const dezenasSelecionadas = new Set();
-
-    function consultarParticipante() {
-      const nome = document.getElementById("nomeConsulta").value.trim();
-      if (!nome) return alert("Digite o nome para continuar.");
-
-      // Simula consulta
-      if (nome.toLowerCase().includes("joão")) {
-        document.getElementById("etapa1").classList.add("hidden");
-        document.getElementById("escolhaExistente").classList.remove("hidden");
-      } else {
-        document.getElementById("etapa1").classList.add("hidden");
-        irParaCadastro();
-      }
-    }
-
-    function irParaCadastro() {
-      document.getElementById("escolhaExistente").classList.add("hidden");
-      document.getElementById("formularioCadastro").classList.remove("hidden");
-      gerarDezenas();
-    }
-
-    function irParaResumo() {
-      document.getElementById("escolhaExistente").classList.add("hidden");
-      // Simula dados antigos
-      document.getElementById("nomeCompleto").value = "João da Silva";
-      document.getElementById("nomeJogo").value = "João Mega";
-      document.getElementById("whatsapp").value = "(35) 99111-1111";
-      document.getElementById("cidade").value = "Alfenas";
-      dezenasSelecionadas.clear();
-      for (let i = 1; i <= 10; i++) dezenasSelecionadas.add(i);
-      document.getElementById("formularioCadastro").classList.remove("hidden");
-      gerarDezenas();
-      mostrarResumo();
-    }
-
-    function gerarDezenas() {
-      const container = document.getElementById("dezenas");
-      container.innerHTML = "";
-      for (let i = 1; i <= 60; i++) {
-        const dez = document.createElement("div");
-        dez.textContent = String(i).padStart(2, "0");
-        dez.className = "dezena";
-        if (dezenasSelecionadas.has(i)) dez.classList.add("selected");
-        dez.onclick = () => toggleDezena(i, dez);
-        container.appendChild(dez);
-      }
-      atualizarContador();
-    }
-
-    function toggleDezena(n, el) {
-      if (dezenasSelecionadas.has(n)) {
-        dezenasSelecionadas.delete(n);
-        el.classList.remove("selected");
-      } else {
-        if (dezenasSelecionadas.size >= 10) return;
-        dezenasSelecionadas.add(n);
-        el.classList.add("selected");
-      }
-      atualizarContador();
-    }
-
-    function atualizarContador() {
-      const contador = document.getElementById("contador");
-      contador.textContent = `${dezenasSelecionadas.size} de 10 dezenas selecionadas`;
-      document.getElementById("btnConfirmarCadastro").classList.toggle("hidden", dezenasSelecionadas.size !== 10);
-    }
-
-    function mostrarResumo() {
-      const dados = `
-        <p><strong>Nome:</strong> ${document.getElementById("nomeCompleto").value}</p>
-        <p><strong>Nome no Jogo:</strong> ${document.getElementById("nomeJogo").value}</p>
-        <p><strong>WhatsApp:</strong> ${document.getElementById("whatsapp").value}</p>
-        <p><strong>Cidade:</strong> ${document.getElementById("cidade").value}</p>
-        <p><strong>Dezenas:</strong> ${[...dezenasSelecionadas].sort((a,b)=>a-b).map(n=>String(n).padStart(2,"0")).join(", ")}</p>
-      `;
-      document.getElementById("formularioCadastro").classList.add("hidden");
-      document.getElementById("resumoDados").innerHTML = dados;
-      document.getElementById("resumoCadastro").classList.remove("hidden");
-    }
-
-    function voltarParaEdicao() {
-      document.getElementById("resumoCadastro").classList.add("hidden");
-      document.getElementById("formularioCadastro").classList.remove("hidden");
-    }
-
-    function enviarDados() {
-      const payload = {
-        nomeCompleto: document.getElementById("nomeCompleto").value,
-        nomeJogo: document.getElementById("nomeJogo").value,
-        whatsapp: document.getElementById("whatsapp").value,
-        cidade: document.getElementById("cidade").value,
-        dezenas: [...dezenasSelecionadas].sort((a,b)=>a-b)
-      };
-
-      fetch("https://script.google.com/macros/s/AKfycbxct64GeIbXuCxIEnyJM8De72cRw_LBAfEftYHUXBH0amI7YaZ6h8QbsO54qxiFeDLc/exec", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      })
-      .then(res => res.json())
-      .then(data => {
-        if (data.result === "success") {
-          document.getElementById("resumoCadastro").classList.add("hidden");
-          document.getElementById("agradecimento").classList.remove("hidden");
-        } else {
-          alert("Erro ao enviar os dados. Tente novamente.");
-        }
+    function copiarPix() {
+      const chave = document.getElementById("chavePix").innerText;
+      navigator.clipboard.writeText(chave).then(() => {
+        alert("Chave PIX copiada!");
       });
     }
 
-    function reiniciarCadastro() {
-      location.reload();
+    function enviarJogo() {
+      const nome = document.getElementById("nome").value.trim();
+      if (!nome) {
+        alert("Digite seu nome para o jogo.");
+        return;
+      }
+
+      let dezenas = [];
+      for (let i = 1; i <= 10; i++) {
+        const valor = parseInt(document.getElementById(`dezena${i}`).value);
+        if (isNaN(valor) || valor < 1 || valor > 80) {
+          alert(`Dezena ${i} inválida. Digite um número entre 1 e 80.`);
+          return;
+        }
+        if (dezenas.includes(valor)) {
+          alert(`Dezena repetida: ${valor}. Escolha dezenas únicas.`);
+          return;
+        }
+        dezenas.push(valor);
+      }
+
+      dezenas.sort((a, b) => a - b);
+      const preco = 5;
+
+      // Exibir confirmação
+      document.getElementById("resumo").innerHTML = `
+        ✅ <strong>Confirmação do Pedido:</strong><br>
+        👤 <strong>Nome:</strong> ${nome}<br>
+        🔢 <strong>Dezenas Escolhidas:</strong> ${dezenas.join(", ")}<br>
+        💰 <strong>Valor Total:</strong> <span style="color:green">R$${preco},00</span><br><br>
+
+        <strong>🔔 Agora é só fazer o PIX para confirmar sua participação no bolão:</strong><br>
+        📲 <strong>Chave PIX:</strong> <span id="chavePix">seuemail@pix.com</span> 
+        <button onclick="copiarPix()">📋 Copiar PIX</button><br><br>
+
+        🧠 <em>“A sorte acompanha quem toma atitude.”</em><br>
+        ✅ Seu nome será inserido na planilha oficial após o pagamento.<br>
+        ⏳ <strong>Vagas limitadas!</strong> Garanta seu lugar agora e concorra a milhões!<br><br>
+
+        ⚠️ Após o pagamento, envie o comprovante no WhatsApp:<br>
+        <a href="https://wa.me/5599999999999" target="_blank">📲 Enviar Comprovante</a>
+      `;
+
+      // Enviar para Google Sheets via Google Apps Script
+      const url = "https://script.google.com/macros/s/AKfycbxct64GeIbXuCxIEnyJM8De72cRw_LBAfEftYHUXBH0amI7YaZ6h8QbsO54qxiFeDLc/exec"; // Substitua pelo seu link do Web App
+
+      fetch(url, {
+        method: "POST",
+        body: JSON.stringify({
+          nome: nome,
+          jogos: [dezenas]
+        }),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(response => response.text())
+      .then(data => {
+        console.log("Enviado com sucesso para a planilha:", data);
+      })
+      .catch(error => {
+        console.error("Erro ao enviar para a planilha:", error);
+      });
     }
   </script>
 
 </body>
 </html>
 
-  
