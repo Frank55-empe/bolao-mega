@@ -1,111 +1,67 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8">
-  <title>Bolão da Sorte</title>
-  <style>
-    body { font-family: Arial, sans-serif; margin: 20px; }
-    input[type="number"] { width: 60px; margin: 3px; }
-    button { margin-top: 10px; padding: 10px 20px; }
-    table, th, td { border: 1px solid #ccc; border-collapse: collapse; padding: 8px; }
-    table { margin-top: 20px; width: 100%; }
-  </style>
-</head>
-<body>
+function gerarJogos() {
+  const nome = document.getElementById("nome").value.trim();
+  const qtdJogos = parseInt(document.getElementById("quantidade").value);
+  const preco = qtdJogos * 5;
+  const resumo = document.getElementById("resumo");
+  const planilha = document.getElementById("planilha").querySelector("tbody");
 
-  <h2>Bolão da Sorte - Escolha suas 10 dezenas</h2>
+  if (!nome || isNaN(qtdJogos) || qtdJogos <= 0) {
+    alert("Preencha o nome e a quantidade corretamente.");
+    return;
+  }
 
-  <label for="nome">Nome a colocar no jogo:</label><br>
-  <input type="text" id="nome" placeholder="Ex: João da Sorte"><br><br>
+  planilha.innerHTML = "";
+  let todasAsDezenas = [];
 
-  <label>Escolha suas 10 dezenas (entre 1 e 80):</label><br>
-  <div id="dezenas">
-    <!-- Campos para dezenas -->
-    <script>
-      for (let i = 1; i <= 10; i++) {
-        document.write(`<input type="number" id="dezena${i}" min="1" max="80" required>`);
-      }
-    </script>
-  </div><br>
+  for (let i = 0; i < qtdJogos; i++) {
+    const dezenas = gerarDezenas();
+    todasAsDezenas.push(dezenas);
+    const linha = `<tr>
+      <td>${nome}</td>
+      <td>Jogo ${i + 1}</td>
+      <td>${dezenas.join(", ")}</td>
+    </tr>`;
+    planilha.innerHTML += linha;
+  }
 
-  <button onclick="enviarJogo()">Confirmar Jogo</button>
+  // Enviar para Google Sheets via POST
+  const url = "https://script.google.com/macros/s/AKfycbxct64GeIbXuCxIEnyJM8De72cRw_LBAfEftYHUXBH0amI7YaZ6h8QbsO54qxiFeDLc/exec"; // substitua pelo link do Google Script
 
-  <div id="resumo" style="margin-top: 30px;"></div>
-
-  <script>
-    function copiarPix() {
-      const chave = document.getElementById("chavePix").innerText;
-      navigator.clipboard.writeText(chave).then(() => {
-        alert("Chave PIX copiada!");
-      });
+  fetch(url, {
+    method: "POST",
+    body: JSON.stringify({
+      nome: nome,
+      jogos: todasAsDezenas
+    }),
+    headers: {
+      "Content-Type": "application/json"
     }
+  })
+  .then(response => response.text())
+  .then(data => {
+    console.log("Dados enviados para planilha: " + data);
+  })
+  .catch(error => {
+    console.error("Erro ao enviar para planilha:", error);
+  });
 
-    function enviarJogo() {
-      const nome = document.getElementById("nome").value.trim();
-      if (!nome) {
-        alert("Digite seu nome para o jogo.");
-        return;
-      }
+  resumo.innerHTML = `
+    ✅ <strong>Confirmação do Pedido:</strong><br>
+    👤 <strong>Nome:</strong> ${nome}<br>
+    🎲 <strong>Jogos:</strong> ${qtdJogos}<br>
+    🔢 <strong>Dezenas:</strong> ${todasAsDezenas.map(d => d.join(", ")).join(" | ")}<br>
+    💰 <strong>Valor Total:</strong> <span style="color:green">R$${preco},00</span><br><br>
 
-      let dezenas = [];
-      for (let i = 1; i <= 10; i++) {
-        const valor = parseInt(document.getElementById(`dezena${i}`).value);
-        if (isNaN(valor) || valor < 1 || valor > 80) {
-          alert(`Dezena ${i} inválida. Digite um número entre 1 e 80.`);
-          return;
-        }
-        if (dezenas.includes(valor)) {
-          alert(`Dezena repetida: ${valor}. Escolha dezenas únicas.`);
-          return;
-        }
-        dezenas.push(valor);
-      }
+    <strong>🔔 Agora é só fazer o PIX para confirmar sua participação no bolão:</strong><br>
+    📲 <strong>Chave PIX:</strong> <span id="chavePix">seuemail@pix.com</span> 
+    <button onclick="copiarPix()">📋 Copiar PIX</button><br><br>
 
-      dezenas.sort((a, b) => a - b);
-      const preco = 5;
+    🧠 <em>“A sorte acompanha quem toma atitude.”</em><br>
+    ✅ Seu nome será inserido na planilha oficial após o pagamento.<br>
+    ⏳ <strong>Vagas limitadas!</strong> Garanta seu lugar agora e concorra a milhões!<br><br>
 
-      // Exibir confirmação
-      document.getElementById("resumo").innerHTML = `
-        ✅ <strong>Confirmação do Pedido:</strong><br>
-        👤 <strong>Nome:</strong> ${nome}<br>
-        🔢 <strong>Dezenas Escolhidas:</strong> ${dezenas.join(", ")}<br>
-        💰 <strong>Valor Total:</strong> <span style="color:green">R$${preco},00</span><br><br>
-
-        <strong>🔔 Agora é só fazer o PIX para confirmar sua participação no bolão:</strong><br>
-        📲 <strong>Chave PIX:</strong> <span id="chavePix">seuemail@pix.com</span> 
-        <button onclick="copiarPix()">📋 Copiar PIX</button><br><br>
-
-        🧠 <em>“A sorte acompanha quem toma atitude.”</em><br>
-        ✅ Seu nome será inserido na planilha oficial após o pagamento.<br>
-        ⏳ <strong>Vagas limitadas!</strong> Garanta seu lugar agora e concorra a milhões!<br><br>
-
-        ⚠️ Após o pagamento, envie o comprovante no WhatsApp:<br>
-        <a href="https://wa.me/5599999999999" target="_blank">📲 Enviar Comprovante</a>
-      `;
-
-      // Enviar para Google Sheets via Google Apps Script
-      const url = "https://script.google.com/macros/s/AKfycbxct64GeIbXuCxIEnyJM8De72cRw_LBAfEftYHUXBH0amI7YaZ6h8QbsO54qxiFeDLc/exec"; // Substitua pelo seu link do Web App
-
-      fetch(url, {
-        method: "POST",
-        body: JSON.stringify({
-          nome: nome,
-          jogos: [dezenas]
-        }),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(response => response.text())
-      .then(data => {
-        console.log("Enviado com sucesso para a planilha:", data);
-      })
-      .catch(error => {
-        console.error("Erro ao enviar para a planilha:", error);
-      });
-    }
-  </script>
-
-</body>
-</html>
+    ⚠️ Após o pagamento, envie o comprovante no WhatsApp:<br>
+    <a href="https://wa.me/5599999999999" target="_blank">📲 Enviar Comprovante</a>
+  `;
+}
 
