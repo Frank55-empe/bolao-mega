@@ -194,6 +194,14 @@
       } finally {
         loading.style.display = "none";
       }
+      const response = await fetch("https://script.google.com/macros/s/SEU-CODIGO/exec", {
+  method: "POST",
+  headers: {
+    "Content-Type": "application/json"
+  },
+  body: JSON.stringify(dados)
+});
+
     });
   </script>
 </body>
