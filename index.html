@@ -3,165 +3,180 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Bolão da Mega Sena</title>
+  <title>Bolão da Mega Positivo</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; max-width: 600px; margin: auto; }
+    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
     .hidden { display: none; }
-    .dezena-grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 10px; margin: 20px 0; }
-    .dezena { padding: 10px; text-align: center; background-color: #eee; border-radius: 5px; cursor: pointer; }
-    .dezena.selected { background-color: #4caf50; color: white; }
-    button { margin: 10px 0; padding: 10px 20px; cursor: pointer; }
+    .form-step { max-width: 600px; margin: auto; background: #fff; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; }
+    input, select, button { width: 100%; padding: 10px; margin: 10px 0; }
+    .grid { display: grid; grid-template-columns: repeat(6, 1fr); gap: 5px; }
+    .dezena { background: #ddd; padding: 10px; text-align: center; border-radius: 4px; cursor: pointer; }
+    .dezena.selected { background: green; color: white; }
+    .counter { text-align: center; margin: 10px 0; font-weight: bold; }
   </style>
 </head>
 <body>
-  <h1>Cadastro no Bolão da Mega Sena</h1>
 
-  <!-- Etapa 1: Cadastro Inicial -->
-  <div id="etapa1">
-    <label>Nome completo: <input type="text" id="nomeCompleto"></label><br>
-    <label>Nome para o jogo: <input type="text" id="nomeJogo"></label><br>
-    <label>WhatsApp: <input type="text" id="whatsapp"></label><br>
-    <label>Cidade: <input type="text" id="cidade"></label><br>
-    <button onclick="verificarCadastro()">Próximo</button>
+  <div id="etapa1" class="form-step">
+    <h2>Bem-vindo ao Bolão da Mega</h2>
+    <input type="text" id="nomeConsulta" placeholder="Digite seu nome completo">
+    <button onclick="consultarParticipante()">Avançar</button>
   </div>
 
-  <!-- Etapa 2: Opção de manter jogo -->
-  <div id="etapa2" class="hidden">
-    <p>Você já participou antes. Deseja manter seu jogo anterior?</p>
-    <button onclick="manterJogo()">Manter meu jogo</button>
-    <button onclick="novoJogo()">Novo jogo</button>
+  <div id="escolhaExistente" class="form-step hidden">
+    <h2>Cadastro encontrado</h2>
+    <button onclick="irParaResumo()">1 - Manter meu jogo</button>
+    <button onclick="irParaCadastro()">2 - Novo jogo</button>
   </div>
 
-  <!-- Etapa 3: Seleção de Dezenas -->
-  <div id="etapa3" class="hidden">
-    <p>Selecione 10 dezenas:</p>
-    <div class="dezena-grid" id="gradeDezenas"></div>
-    <p>Dezenas selecionadas: <span id="contador">0</span>/10</p>
-    <button id="btnConfirmarJogo" onclick="mostrarConfirmacao()" disabled>Confirmar Jogo</button>
+  <div id="formularioCadastro" class="form-step hidden">
+    <h2>Cadastro do Participante</h2>
+    <input type="text" id="nomeCompleto" placeholder="Nome Completo">
+    <input type="text" id="nomeJogo" placeholder="Nome que vai no jogo">
+    <input type="text" id="whatsapp" placeholder="WhatsApp">
+    <input type="text" id="cidade" placeholder="Cidade">
+
+    <div class="counter" id="contador">0 de 10 dezenas selecionadas</div>
+    <div class="grid" id="dezenas"></div>
+
+    <button id="btnConfirmarCadastro" class="hidden" onclick="mostrarResumo()">Confirmar Jogo</button>
   </div>
 
-  <!-- Etapa 4: Confirmação -->
-  <div id="etapa4" class="hidden">
-    <h3>Confirme seus dados:</h3>
-    <div id="resumo"></div>
-    <button onclick="corrigirDados()">Corrigir</button>
-    <button onclick="enviarDados()">Confirmar e Enviar</button>
+  <div id="resumoCadastro" class="form-step hidden">
+    <h2>Confirme seus dados</h2>
+    <div id="resumoDados"></div>
+    <button onclick="enviarDados()">Enviar Cadastro</button>
+    <button onclick="voltarParaEdicao()">Corrigir Dados</button>
   </div>
 
-  <!-- Etapa 5: Agradecimento -->
-  <div id="etapa5" class="hidden">
-    <h2>Obrigado por participar!</h2>
-    <p>Faça o pagamento via Pix usando os dados abaixo:</p>
-    <p><strong>Chave Pix:</strong> 00000000000</p>
-    <p><strong>Nome:</strong> Organizador do Bolão</p>
+  <div id="agradecimento" class="form-step hidden">
+    <h2>Cadastro enviado!</h2>
+    <p>Obrigado por participar do bolão! Seu jogo está registrado.<br>
+    Efetue o pagamento via Pix:<br>
+    <strong>Chave Pix:</strong> 35991717912<br>
+    <strong>Nome:</strong> Frank de Souza Borges</p>
+    <button onclick="reiniciarCadastro()">Fazer novo cadastro</button>
   </div>
 
   <script>
-    const participantes = [];
-    let dezenasSelecionadas = [];
+    const dezenasSelecionadas = new Set();
 
-    function verificarCadastro() {
-      const nome = document.getElementById('nomeCompleto').value.trim();
-      if (participantes.includes(nome)) {
-        document.getElementById('etapa1').classList.add('hidden');
-        document.getElementById('etapa2').classList.remove('hidden');
+    function consultarParticipante() {
+      const nome = document.getElementById("nomeConsulta").value.trim();
+      if (!nome) return alert("Digite o nome para continuar.");
+
+      // Simula consulta
+      if (nome.toLowerCase().includes("joão")) {
+        document.getElementById("etapa1").classList.add("hidden");
+        document.getElementById("escolhaExistente").classList.remove("hidden");
       } else {
-        participantes.push(nome);
-        novoJogo();
+        document.getElementById("etapa1").classList.add("hidden");
+        irParaCadastro();
       }
     }
 
-    function manterJogo() {
-      dezenasSelecionadas = ["01", "02", "03", "04", "05", "06", "07", "08", "09", "10"];
-      mostrarConfirmacao();
+    function irParaCadastro() {
+      document.getElementById("escolhaExistente").classList.add("hidden");
+      document.getElementById("formularioCadastro").classList.remove("hidden");
+      gerarDezenas();
     }
 
-    function novoJogo() {
-      document.getElementById('etapa1').classList.add('hidden');
-      document.getElementById('etapa2').classList.add('hidden');
-      document.getElementById('etapa3').classList.remove('hidden');
-      gerarGrade();
+    function irParaResumo() {
+      document.getElementById("escolhaExistente").classList.add("hidden");
+      // Simula dados antigos
+      document.getElementById("nomeCompleto").value = "João da Silva";
+      document.getElementById("nomeJogo").value = "João Mega";
+      document.getElementById("whatsapp").value = "(35) 99111-1111";
+      document.getElementById("cidade").value = "Alfenas";
+      dezenasSelecionadas.clear();
+      for (let i = 1; i <= 10; i++) dezenasSelecionadas.add(i);
+      document.getElementById("formularioCadastro").classList.remove("hidden");
+      gerarDezenas();
+      mostrarResumo();
     }
 
-    function gerarGrade() {
-      const grade = document.getElementById('gradeDezenas');
-      grade.innerHTML = '';
+    function gerarDezenas() {
+      const container = document.getElementById("dezenas");
+      container.innerHTML = "";
       for (let i = 1; i <= 60; i++) {
-        const dezena = String(i).padStart(2, '0');
-        const div = document.createElement('div');
-        div.textContent = dezena;
-        div.className = 'dezena';
-        div.onclick = () => selecionarDezena(div, dezena);
-        grade.appendChild(div);
+        const dez = document.createElement("div");
+        dez.textContent = String(i).padStart(2, "0");
+        dez.className = "dezena";
+        if (dezenasSelecionadas.has(i)) dez.classList.add("selected");
+        dez.onclick = () => toggleDezena(i, dez);
+        container.appendChild(dez);
       }
+      atualizarContador();
     }
 
-    function selecionarDezena(div, dezena) {
-      if (div.classList.contains('selected')) {
-        div.classList.remove('selected');
-        dezenasSelecionadas = dezenasSelecionadas.filter(d => d !== dezena);
+    function toggleDezena(n, el) {
+      if (dezenasSelecionadas.has(n)) {
+        dezenasSelecionadas.delete(n);
+        el.classList.remove("selected");
       } else {
-        if (dezenasSelecionadas.length < 10) {
-          div.classList.add('selected');
-          dezenasSelecionadas.push(dezena);
-        }
+        if (dezenasSelecionadas.size >= 10) return;
+        dezenasSelecionadas.add(n);
+        el.classList.add("selected");
       }
-      document.getElementById('contador').textContent = dezenasSelecionadas.length;
-      document.getElementById('btnConfirmarJogo').disabled = dezenasSelecionadas.length !== 10;
+      atualizarContador();
     }
 
-    function mostrarConfirmacao() {
-      document.getElementById('etapa3').classList.add('hidden');
-      document.getElementById('etapa4').classList.remove('hidden');
+    function atualizarContador() {
+      const contador = document.getElementById("contador");
+      contador.textContent = `${dezenasSelecionadas.size} de 10 dezenas selecionadas`;
+      document.getElementById("btnConfirmarCadastro").classList.toggle("hidden", dezenasSelecionadas.size !== 10);
+    }
 
-      const resumo = document.getElementById('resumo');
-      const nome = document.getElementById('nomeCompleto').value;
-      const nomeJogo = document.getElementById('nomeJogo').value;
-      const whatsapp = document.getElementById('whatsapp').value;
-      const cidade = document.getElementById('cidade').value;
-
-      resumo.innerHTML = `
-        <p><strong>Nome completo:</strong> ${nome}</p>
-        <p><strong>Nome para o jogo:</strong> ${nomeJogo}</p>
-        <p><strong>WhatsApp:</strong> ${whatsapp}</p>
-        <p><strong>Cidade:</strong> ${cidade}</p>
-        <p><strong>Dezenas:</strong> ${dezenasSelecionadas.join(', ')}</p>
+    function mostrarResumo() {
+      const dados = `
+        <p><strong>Nome:</strong> ${document.getElementById("nomeCompleto").value}</p>
+        <p><strong>Nome no Jogo:</strong> ${document.getElementById("nomeJogo").value}</p>
+        <p><strong>WhatsApp:</strong> ${document.getElementById("whatsapp").value}</p>
+        <p><strong>Cidade:</strong> ${document.getElementById("cidade").value}</p>
+        <p><strong>Dezenas:</strong> ${[...dezenasSelecionadas].sort((a,b)=>a-b).map(n=>String(n).padStart(2,"0")).join(", ")}</p>
       `;
+      document.getElementById("formularioCadastro").classList.add("hidden");
+      document.getElementById("resumoDados").innerHTML = dados;
+      document.getElementById("resumoCadastro").classList.remove("hidden");
     }
 
-    function corrigirDados() {
-      document.getElementById('etapa4').classList.add('hidden');
-      document.getElementById('etapa3').classList.remove('hidden');
+    function voltarParaEdicao() {
+      document.getElementById("resumoCadastro").classList.add("hidden");
+      document.getElementById("formularioCadastro").classList.remove("hidden");
     }
 
     function enviarDados() {
-      const dados = {
-        nome: document.getElementById('nomeCompleto').value,
-        nomeJogo: document.getElementById('nomeJogo').value,
-        whatsapp: document.getElementById('whatsapp').value,
-        cidade: document.getElementById('cidade').value,
-        dezenas: dezenasSelecionadas.join(', ')
+      const payload = {
+        nomeCompleto: document.getElementById("nomeCompleto").value,
+        nomeJogo: document.getElementById("nomeJogo").value,
+        whatsapp: document.getElementById("whatsapp").value,
+        cidade: document.getElementById("cidade").value,
+        dezenas: [...dezenasSelecionadas].sort((a,b)=>a-b)
       };
 
-      // Envio simulado
-      fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
-        method: 'POST',
-        body: JSON.stringify(dados),
-        headers: { 'Content-Type': 'application/json' }
+      fetch("https://script.google.com/macros/s/AKfycbxct64GeIbXuCxIEnyJM8De72cRw_LBAfEftYHUXBH0amI7YaZ6h8QbsO54qxiFeDLc/exec", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
       })
       .then(res => res.json())
-      .then(() => {
-        document.getElementById('etapa4').classList.add('hidden');
-        document.getElementById('etapa5').classList.remove('hidden');
-        // Resetar formulário
-        dezenasSelecionadas = [];
-        document.getElementById('nomeCompleto').value = '';
-        document.getElementById('nomeJogo').value = '';
-        document.getElementById('whatsapp').value = '';
-        document.getElementById('cidade').value = '';
+      .then(data => {
+        if (data.result === "success") {
+          document.getElementById("resumoCadastro").classList.add("hidden");
+          document.getElementById("agradecimento").classList.remove("hidden");
+        } else {
+          alert("Erro ao enviar os dados. Tente novamente.");
+        }
       });
     }
+
+    function reiniciarCadastro() {
+      location.reload();
+    }
   </script>
+
 </body>
 </html>
 
+  
