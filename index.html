@@ -137,80 +137,57 @@
 
   <div id="confirmacao">
     <h2>Confira seus dados:</h2>
-    <p><strong>Nome:</strong> <span id="confNome"></span></p>
-    <p><strong>Nome para Planilha:</strong> <span id="confPlanilha"></span></p>
-    <p><strong>WhatsApp:</strong> <span id="confWhats"></span></p>
-    <p><strong>Cidade:</strong> <span id="confCidade"></span></p>
-    <p><strong>Dezenas:</strong> <span id="confDezenas"></span></p>
-    <button id="btn-voltar">Confirmar Envio</button>
+    <p id="resumoDados"></p>
+    <button id="btn-voltar" onclick="window.location.reload()">Voltar</button>
   </div>
 
   <script>
-    const dezenasDiv = document.getElementById("dezenas");
-    const contador = document.getElementById("contador");
     const form = document.getElementById("formulario");
-    const loading = document.getElementById("loading");
-    const confirmacao = document.getElementById("confirmacao");
-    const btnVoltar = document.getElementById("btn-voltar");
-
-    let dezenasSelecionadas = [];
+    const dezenasContainer = document.getElementById("dezenas");
+    const contador = document.getElementById("contador");
 
     for (let i = 1; i <= 60; i++) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.textContent = i.toString().padStart(2, '0');
       btn.addEventListener("click", () => {
-        if (dezenasSelecionadas.includes(i)) {
-          dezenasSelecionadas = dezenasSelecionadas.filter(d => d !== i);
+        btn.classList.toggle("selected");
+        const selecionadas = document.querySelectorAll(".grid button.selected");
+        if (selecionadas.length > 10) {
           btn.classList.remove("selected");
-        } else if (dezenasSelecionadas.length < 10) {
-          dezenasSelecionadas.push(i);
-          btn.classList.add("selected");
+          alert("Você só pode escolher 10 dezenas!");
         }
-        contador.textContent = `Dezenas escolhidas: ${dezenasSelecionadas.length}/10`;
+        contador.textContent = `Dezenas escolhidas: ${selecionadas.length}/10`;
       });
-      dezenasDiv.appendChild(btn);
+      dezenasContainer.appendChild(btn);
     }
 
-    form.addEventListener("submit", (e) => {
+    form.addEventListener("submit", function (e) {
       e.preventDefault();
-      if (dezenasSelecionadas.length !== 10) {
-        alert("Por favor, selecione 10 dezenas.");
-        return;
-      }
+      document.getElementById("loading").style.display = "block";
 
-      document.getElementById("confNome").textContent = form.nome.value;
-      document.getElementById("confPlanilha").textContent = form.nomePlanilha.value;
-      document.getElementById("confWhats").textContent = form.whatsapp.value;
-      document.getElementById("confCidade").textContent = form.cidade.value;
-      document.getElementById("confDezenas").textContent = dezenasSelecionadas.sort((a, b) => a - b).join(", ");
+      const dezenasSelecionadas = Array.from(document.querySelectorAll(".grid button.selected"))
+        .map(btn => btn.textContent)
+        .join(",");
 
-      form.style.display = "none";
-      confirmacao.style.display = "block";
-    });
+      const dados = new FormData(form);
+      dados.append("dezenas", dezenasSelecionadas);
 
-    btnVoltar.addEventListener("click", () => {
-      loading.style.display = "block";
-
-      const dados = {
-        nome: form.nome.value,
-        nomePlanilha: form.nomePlanilha.value,
-        whatsapp: form.whatsapp.value,
-        cidade: form.cidade.value,
-        dezenas: dezenasSelecionadas.join(", ")
-      };
-
-      fetch('https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec', {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(dados)
-      }).then(() => {
-        confirmacao.innerHTML = `<h2>Cadastro realizado com sucesso!</h2><p>Boa sorte 🍀</p>`;
+      fetch("https://script.google.com/macros/s/SEU_SCRIPT_ID_AQUI/exec", {
+        method: "POST",
+        body: dados
+      })
+      .then(response => response.text())
+      .then(() => {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("confirmacao").style.display = "block";
+      })
+      .catch(err => {
+        alert("Erro ao enviar dados. Tente novamente.");
+        document.getElementById("loading").style.display = "none";
       });
     });
   </script>
 </body>
 </html>
+
