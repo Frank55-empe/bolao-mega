@@ -1,146 +1,85 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
-  <title>Bolão Mega Positivo</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Cadastro no Bolão</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      padding: 30px;
-    }
-    label, input {
-      display: block;
-      margin: 10px auto;
-      font-size: 18px;
-    }
-    .dezenas {
-      display: grid;
-      grid-template-columns: repeat(10, 1fr);
-      gap: 10px;
-      max-width: 600px;
-      margin: 20px auto;
-    }
-    .dezena-btn {
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      background-color: #f2f2f2;
-      cursor: pointer;
-    }
-    .dezena-btn.selecionada {
-      background-color: #90ee90;
-      font-weight: bold;
-    }
-    button#btnVoltar {
-      padding: 12px 24px;
-      font-size: 18px;
-      margin-top: 20px;
-    }
-    .loading {
-      display: none;
-      font-weight: bold;
-      color: green;
-      margin-top: 20px;
-    }
+    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
+    form { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; }
+    input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
+    .grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+    .grid button { width: 45px; height: 45px; border: none; border-radius: 50%; background: #eee; cursor: pointer; }
+    .grid button.selected { background: #4caf50; color: white; }
+    #loading, #confirmacao { display: none; text-align: center; margin-top: 20px; }
   </style>
 </head>
 <body>
 
-  <h1>Participe do Bolão Mega Positivo</h1>
+<form id="formulario">
+  <h2>Cadastro no Bolão</h2>
+  <input type="text" name="nome" placeholder="Seu nome completo" required />
+  <input type="text" name="nomePlanilha" placeholder="Nome da planilha desejada" required />
+  <input type="text" name="whatsapp" placeholder="WhatsApp (com DDD)" required />
+  <input type="text" name="cidade" placeholder="Cidade" required />
 
-  <form id="formulario">
-    <label>Nome:
-      <input type="text" name="nome" required>
-    </label>
-    <label>Nome da Planilha:
-      <input type="text" name="nomePlanilha" required>
-    </label>
-    <label>WhatsApp:
-      <input type="tel" name="whatsapp" required>
-    </label>
-    <label>Cidade:
-      <input type="text" name="cidade" required>
-    </label>
+  <p>Escolha 6 dezenas:</p>
+  <div class="grid" id="dezenas">
+    <!-- Gera 60 botões de 01 a 60 -->
+  </div>
 
-    <h2>Escolha exatamente 10 dezenas:</h2>
-    <div class="dezenas" id="dezenasContainer"></div>
+  <button type="submit">Enviar</button>
+  <div id="loading">Enviando...</div>
+  <div id="confirmacao">Cadastro enviado com sucesso!</div>
+</form>
 
-    <button type="button" id="btnVoltar">Confirmar Envio</button>
-  </form>
-
-  <div class="loading" id="loading">Enviando dados... Aguarde!</div>
-
-  <script>
-    const dezenasContainer = document.getElementById("dezenasContainer");
-    const btnVoltar = document.getElementById("btnVoltar");
-    const form = document.getElementById("formulario");
-    const loading = document.getElementById("loading");
-
-    let dezenasSelecionadas = [];
-
-    // Criar botões de 01 a 60
-    for (let i = 1; i <= 60; i++) {
-      const btn = document.createElement("button");
-      btn.type = "button";
-      btn.innerText = i.toString().padStart(2, '0');
-      btn.className = "dezena-btn";
-      btn.onclick = () => toggleDezena(i, btn);
-      dezenasContainer.appendChild(btn);
-    }
-
-    function toggleDezena(dezena, btn) {
-      const index = dezenasSelecionadas.indexOf(dezena);
-      if (index > -1) {
-        dezenasSelecionadas.splice(index, 1);
-        btn.classList.remove("selecionada");
-      } else {
-        if (dezenasSelecionadas.length < 10) {
-          dezenasSelecionadas.push(dezena);
-          btn.classList.add("selecionada");
-        } else {
-          alert("Você só pode escolher 10 dezenas.");
-        }
-      }
-    }
-
-    btnVoltar.addEventListener("click", () => {
-      if (dezenasSelecionadas.length !== 10) {
-        alert("Você deve selecionar exatamente 10 dezenas!");
-        return;
-      }
-
-      loading.style.display = "block";
-
-      const dados = {
-        nome: form.nome.value,
-        nomePlanilha: form.nomePlanilha.value,
-        whatsapp: form.whatsapp.value,
-        cidade: form.cidade.value,
-        dezenas: dezenasSelecionadas.sort((a, b) => a - b).join(", ")
-      };
-
-      fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
-        method: "POST",
-        body: JSON.stringify(dados),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      })
-      .then(res => res.json())
-      .then(response => {
-        loading.style.display = "none";
-        alert("Cadastro enviado com sucesso! Boa sorte no bolão 🍀");
-        window.location.reload();
-      })
-      .catch(error => {
-        loading.style.display = "none";
-        alert("Erro ao enviar. Tente novamente.");
-        console.error("Erro:", error);
-      });
+<script>
+  const grid = document.getElementById("dezenas");
+  for (let i = 1; i <= 60; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i.toString().padStart(2, '0');
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      btn.classList.toggle("selected");
     });
-  </script>
+    grid.appendChild(btn);
+  }
+
+  const form = document.getElementById("formulario");
+  form.addEventListener("submit", function (e) {
+    e.preventDefault();
+    document.getElementById("loading").style.display = "block";
+
+    const dezenasSelecionadas = Array.from(document.querySelectorAll(".grid button.selected"))
+      .map(btn => btn.textContent)
+      .join(",");
+
+    if (dezenasSelecionadas.split(",").length !== 6) {
+      alert("Você deve selecionar exatamente 6 dezenas.");
+      document.getElementById("loading").style.display = "none";
+      return;
+    }
+
+    const dados = new FormData(form);
+    dados.append("dezenas", dezenasSelecionadas);
+
+    fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
+      method: "POST",
+      body: dados
+    })
+    .then(response => response.text())
+    .then(() => {
+      document.getElementById("loading").style.display = "none";
+      document.getElementById("confirmacao").style.display = "block";
+      form.reset();
+      document.querySelectorAll(".grid button").forEach(btn => btn.classList.remove("selected"));
+    })
+    .catch(err => {
+      alert("Erro ao enviar dados.");
+      document.getElementById("loading").style.display = "none";
+    });
+  });
+</script>
 
 </body>
 </html>
