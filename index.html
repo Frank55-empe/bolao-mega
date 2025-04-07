@@ -177,16 +177,36 @@
         method: "POST",
         body: dados
       })
-      .then(response => response.text())
-      .then(() => {
-        document.getElementById("loading").style.display = "none";
-        document.getElementById("confirmacao").style.display = "block";
-      })
-      .catch(err => {
-        alert("Erro ao enviar dados. Tente novamente.");
-        document.getElementById("loading").style.display = "none";
-      });
-    });
+      btnVoltar.addEventListener("click", () => {
+  loading.style.display = "block";
+
+  const dados = {
+    nome: form.nome.value,
+    nomePlanilha: form.nomePlanilha.value,
+    whatsapp: form.whatsapp.value,
+    cidade: form.cidade.value,
+    dezenas: dezenasSelecionadas.sort((a, b) => a - b).join(", "),
+  };
+
+  fetch("COLE_AQUI_O_LINK_DO_WEB_APP", {
+    method: "POST",
+    body: JSON.stringify(dados),
+    headers: {
+      "Content-Type": "application/json"
+    }
+  })
+  .then(res => res.json())
+  .then(response => {
+    loading.style.display = "none";
+    alert("Cadastro enviado com sucesso!");
+    window.location.reload();
+  })
+  .catch(error => {
+    loading.style.display = "none";
+    alert("Erro ao enviar. Tente novamente.");
+    console.error("Erro:", error);
+  });
+});
   </script>
 </body>
 </html>
