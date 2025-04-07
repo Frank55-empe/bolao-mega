@@ -1,95 +1,73 @@
-<!DOCTYPE html>
-<html lang="pt-br">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>MegaPositivo</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="bg-gray-100 p-4">
-  <div class="max-w-xl mx-auto bg-white p-6 rounded-xl shadow-md">
-    <h1 class="text-2xl font-bold mb-4 text-center">Cadastro MegaPositivo</h1>
-    <form id="megaForm" class="space-y-4">
-      <input type="text" name="nome" placeholder="Nome Completo" required class="w-full border p-2 rounded">
-      <input type="tel" name="whatsapp" placeholder="Número do WhatsApp" required class="w-full border p-2 rounded">
-      <input type="text" name="cidade" placeholder="Cidade" required class="w-full border p-2 rounded">
-      <input type="text" name="planilha_nome" placeholder="Nome que vai na planilha" required class="w-full border p-2 rounded">
-      
-      <div class="mt-4">
-        <h2 class="font-semibold mb-2">Escolha 10 dezenas:</h2>
-        <div id="dezenasContainer" class="grid grid-cols-6 gap-2"></div>
-        <p id="msg" class="text-sm text-red-500 mt-2 hidden">Você deve escolher exatamente 10 dezenas.</p>
-      </div>
+<!-- MANTÉM TUDO IGUAL ATÉ A PARTE DO SCRIPT -->
 
-      <button type="submit" class="w-full bg-green-600 text-white py-2 rounded hover:bg-green-700 transition">Enviar</button>
-    </form>
-    <p id="sucesso" class="text-green-600 mt-4 hidden">Cadastro enviado com sucesso!</p>
-  </div>
+<script>
+  const dezenasContainer = document.getElementById("dezenasContainer");
+  const msg = document.getElementById("msg");
+  const sucesso = document.getElementById("sucesso");
 
-  <script>
-    const dezenasContainer = document.getElementById("dezenasContainer");
-    const msg = document.getElementById("msg");
-    const sucesso = document.getElementById("sucesso");
+  for (let i = 1; i <= 60; i++) {
+    const btn = document.createElement("button");
+    btn.textContent = i.toString().padStart(2, "0");
+    btn.className = "bg-gray-200 hover:bg-blue-200 p-2 rounded";
+    btn.addEventListener("click", (e) => {
+      e.preventDefault();
+      btn.classList.toggle("bg-blue-500");
+      btn.classList.toggle("text-white");
 
-    // Gerar os botões de dezenas
-    for (let i = 1; i <= 60; i++) {
-      const btn = document.createElement("button");
-      btn.textContent = i.toString().padStart(2, "0");
-      btn.className = "bg-gray-200 hover:bg-blue-200 p-2 rounded";
-      btn.addEventListener("click", (e) => {
-        e.preventDefault();
-        btn.classList.toggle("bg-blue-500");
-        btn.classList.toggle("text-white");
+      const selecionados = document.querySelectorAll("#dezenasContainer .bg-blue-500");
+      if (selecionados.length > 10) {
+        btn.classList.remove("bg-blue-500", "text-white");
+        btn.classList.add("bg-gray-200");
+      }
 
-        const selecionados = document.querySelectorAll("#dezenasContainer .bg-blue-500");
-        if (selecionados.length > 10) {
-          btn.classList.remove("bg-blue-500", "text-white");
-          btn.classList.add("bg-gray-200");
-        }
+      msg.classList.toggle("hidden", selecionados.length === 10);
+    });
+    dezenasContainer.appendChild(btn);
+  }
 
-        msg.classList.toggle("hidden", selecionados.length === 10);
-      });
-      dezenasContainer.appendChild(btn);
+  document.getElementById("megaForm").addEventListener("submit", async function (e) {
+    e.preventDefault();
+
+    const selecionados = Array.from(document.querySelectorAll("#dezenasContainer .bg-blue-500"))
+      .map(btn => btn.textContent);
+
+    if (selecionados.length !== 10) {
+      msg.classList.remove("hidden");
+      return;
     }
 
-    // Enviar dados
-    document.getElementById("megaForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
+    const form = e.target;
+    const dados = {
+      nomeCompleto: form.nome.value,
+      nomeParaJogo: form.planilha_nome.value,
+      whatsapp: form.whatsapp.value,
+      cidade: form.cidade.value,
+      dezenas: selecionados
+    };
 
-      const selecionados = Array.from(document.querySelectorAll("#dezenasContainer .bg-blue-500"))
-        .map(btn => btn.textContent);
-
-      if (selecionados.length !== 10) {
-        msg.classList.remove("hidden");
-        return;
-      }
-
-      const form = e.target;
-      const dados = {
-        nome: form.nome.value,
-        whatsapp: form.whatsapp.value,
-        cidade: form.cidade.value,
-        planilha_nome: form.planilha_nome.value,
-        dezenas: selecionados.join(", ")
-      };
-
-      try {
-        const res = await fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
-          method: "POST",
-          body: new URLSearchParams(dados)
-        });
-        if (res.ok) {
-          sucesso.classList.remove("hidden");
-          form.reset();
-          document.querySelectorAll("#dezenasContainer .bg-blue-500").forEach(btn => {
-            btn.classList.remove("bg-blue-500", "text-white");
-            btn.classList.add("bg-gray-200");
-          });
+    try {
+      const res = await fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
+        method: "POST",
+        body: JSON.stringify(dados),
+        headers: {
+          "Content-Type": "application/json"
         }
-      } catch (err) {
+      });
+
+      if (res.ok) {
+        sucesso.classList.remove("hidden");
+        form.reset();
+        document.querySelectorAll("#dezenasContainer .bg-blue-500").forEach(btn => {
+          btn.classList.remove("bg-blue-500", "text-white");
+          btn.classList.add("bg-gray-200");
+        });
+      } else {
         alert("Erro ao enviar. Tente novamente.");
       }
-    });
-  </script>
-</body>
-</html>
+    } catch (err) {
+      alert("Erro ao enviar. Tente novamente.");
+      console.error(err);
+    }
+  });
+</script>
+
