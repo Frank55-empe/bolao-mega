@@ -9,15 +9,34 @@
       text-align: center;
       padding: 30px;
     }
-    label, input, select {
+    label, input {
       display: block;
       margin: 10px auto;
       font-size: 18px;
     }
-    .dezenas button {
-      margin: 5px;
-      padding: 10px 20px;
+    .dezenas {
+      display: grid;
+      grid-template-columns: repeat(10, 1fr);
+      gap: 10px;
+      max-width: 600px;
+      margin: 20px auto;
+    }
+    .dezena-btn {
+      padding: 10px;
+      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+      background-color: #f2f2f2;
+      cursor: pointer;
+    }
+    .dezena-btn.selecionada {
+      background-color: #90ee90;
+      font-weight: bold;
+    }
+    button#btnVoltar {
+      padding: 12px 24px;
       font-size: 18px;
+      margin-top: 20px;
     }
     .loading {
       display: none;
@@ -45,7 +64,7 @@
       <input type="text" name="cidade" required>
     </label>
 
-    <h2>Escolha suas dezenas (exatamente 10):</h2>
+    <h2>Escolha exatamente 10 dezenas:</h2>
     <div class="dezenas" id="dezenasContainer"></div>
 
     <button type="button" id="btnVoltar">Confirmar Envio</button>
@@ -61,10 +80,12 @@
 
     let dezenasSelecionadas = [];
 
+    // Criar botões de 01 a 60
     for (let i = 1; i <= 60; i++) {
       const btn = document.createElement("button");
       btn.type = "button";
       btn.innerText = i.toString().padStart(2, '0');
+      btn.className = "dezena-btn";
       btn.onclick = () => toggleDezena(i, btn);
       dezenasContainer.appendChild(btn);
     }
@@ -73,11 +94,11 @@
       const index = dezenasSelecionadas.indexOf(dezena);
       if (index > -1) {
         dezenasSelecionadas.splice(index, 1);
-        btn.style.backgroundColor = "";
+        btn.classList.remove("selecionada");
       } else {
         if (dezenasSelecionadas.length < 10) {
           dezenasSelecionadas.push(dezena);
-          btn.style.backgroundColor = "#90ee90";
+          btn.classList.add("selecionada");
         } else {
           alert("Você só pode escolher 10 dezenas.");
         }
@@ -86,7 +107,7 @@
 
     btnVoltar.addEventListener("click", () => {
       if (dezenasSelecionadas.length !== 10) {
-        alert("Você deve selecionar exatamente 10 dezenas para participar!");
+        alert("Você deve selecionar exatamente 10 dezenas!");
         return;
       }
 
