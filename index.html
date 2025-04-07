@@ -1,213 +1,125 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Bolão da Mega Positivo</title>
+  <meta charset="UTF-8">
+  <title>Bolão Mega Positivo</title>
   <style>
     body {
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      background: linear-gradient(145deg, #00c6ff, #0072ff);
-      color: #fff;
+      font-family: Arial, sans-serif;
+      text-align: center;
       padding: 30px;
-      margin: 0;
     }
-    h1 {
-      text-align: center;
-      color: #ffea00;
-      font-size: 2.2rem;
-      text-shadow: 1px 1px 3px #000;
-    }
-    form {
-      background-color: rgba(255, 255, 255, 0.1);
-      padding: 25px;
-      border-radius: 20px;
-      max-width: 420px;
-      margin: 30px auto;
-      box-shadow: 0 0 15px rgba(0,0,0,0.3);
-    }
-    label {
+    label, input, select {
       display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-      color: #fff;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: none;
-      border-radius: 10px;
-      font-size: 1rem;
-    }
-    input, select {
-      background: #fff;
-      color: #333;
-    }
-    button {
-      background-color: #ffea00;
-      color: #000;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background-color: #ffe100;
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(6, 1fr);
-      gap: 6px;
-      margin-top: 10px;
-    }
-    .grid button {
-      background-color: #fff;
-      color: #000;
-      font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      transition: 0.2s;
-    }
-    .grid button.selected {
-      background-color: #ffea00;
-      color: #000;
-      transform: scale(1.05);
-    }
-    #contador {
-      text-align: center;
+      margin: 10px auto;
       font-size: 18px;
-      margin-top: 10px;
-      color: #ffea00;
-      font-weight: bold;
     }
-    #loading {
+    .dezenas button {
+      margin: 5px;
+      padding: 10px 20px;
+      font-size: 18px;
+    }
+    .loading {
       display: none;
-      text-align: center;
-      margin-top: 10px;
-    }
-    #loading img {
-      width: 30px;
-    }
-    #confirmacao {
-      display: none;
-      text-align: center;
-      background: #000000aa;
-      padding: 20px;
-      border-radius: 15px;
-      margin: 20px auto;
-      max-width: 420px;
-      color: #fff;
-    }
-    #confirmacao p {
-      margin: 5px 0;
-    }
-    #btn-voltar {
-      background-color: #fff;
-      color: #0072ff;
       font-weight: bold;
-      border-radius: 8px;
-      cursor: pointer;
-      padding: 10px;
-      margin-top: 15px;
+      color: green;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
-  <h1>Bolão da Mega Positivo<br>(Bar do Enoquis)</h1>
+
+  <h1>Participe do Bolão Mega Positivo</h1>
+
   <form id="formulario">
-    <label for="nome">Nome completo:</label>
-    <input type="text" id="nome" name="nome" required />
+    <label>Nome:
+      <input type="text" name="nome" required>
+    </label>
+    <label>Nome da Planilha:
+      <input type="text" name="nomePlanilha" required>
+    </label>
+    <label>WhatsApp:
+      <input type="tel" name="whatsapp" required>
+    </label>
+    <label>Cidade:
+      <input type="text" name="cidade" required>
+    </label>
 
-    <label for="nomePlanilha">Nome para Planilha:</label>
-    <input type="text" id="nomePlanilha" name="nomePlanilha" required />
+    <h2>Escolha suas dezenas (exatamente 10):</h2>
+    <div class="dezenas" id="dezenasContainer"></div>
 
-    <label for="whatsapp">WhatsApp:</label>
-    <input type="text" id="whatsapp" name="whatsapp" required />
-
-    <label for="cidade">Cidade:</label>
-    <input type="text" id="cidade" name="cidade" required />
-
-    <label>Escolha 10 dezenas:</label>
-    <div id="dezenas" class="grid"></div>
-    <div id="contador">Dezenas escolhidas: 0/10</div>
-
-    <button type="submit">Confirmar Cadastro</button>
-    <div id="loading"><img src="https://i.gifer.com/ZZ5H.gif" alt="Carregando..." /></div>
+    <button type="button" id="btnVoltar">Confirmar Envio</button>
   </form>
 
-  <div id="confirmacao">
-    <h2>Confira seus dados:</h2>
-    <p id="resumoDados"></p>
-    <button id="btn-voltar" onclick="window.location.reload()">Voltar</button>
-  </div>
+  <div class="loading" id="loading">Enviando dados... Aguarde!</div>
 
   <script>
+    const dezenasContainer = document.getElementById("dezenasContainer");
+    const btnVoltar = document.getElementById("btnVoltar");
     const form = document.getElementById("formulario");
-    const dezenasContainer = document.getElementById("dezenas");
-    const contador = document.getElementById("contador");
+    const loading = document.getElementById("loading");
+
+    let dezenasSelecionadas = [];
 
     for (let i = 1; i <= 60; i++) {
       const btn = document.createElement("button");
       btn.type = "button";
-      btn.textContent = i.toString().padStart(2, '0');
-      btn.addEventListener("click", () => {
-        btn.classList.toggle("selected");
-        const selecionadas = document.querySelectorAll(".grid button.selected");
-        if (selecionadas.length > 10) {
-          btn.classList.remove("selected");
-          alert("Você só pode escolher 10 dezenas!");
-        }
-        contador.textContent = `Dezenas escolhidas: ${selecionadas.length}/10`;
-      });
+      btn.innerText = i.toString().padStart(2, '0');
+      btn.onclick = () => toggleDezena(i, btn);
       dezenasContainer.appendChild(btn);
     }
 
-    form.addEventListener("submit", function (e) {
-      e.preventDefault();
-      document.getElementById("loading").style.display = "block";
-
-      const dezenasSelecionadas = Array.from(document.querySelectorAll(".grid button.selected"))
-        .map(btn => btn.textContent)
-        .join(",");
-
-      const dados = new FormData(form);
-      dados.append("dezenas", dezenasSelecionadas);
-
-      fetch("https://script.google.com/macros/s/SEU_SCRIPT_ID_AQUI/exec", {
-        method: "POST",
-        body: dados
-      })
-      btnVoltar.addEventListener("click", () => {
-  loading.style.display = "block";
-
-  const dados = {
-    nome: form.nome.value,
-    nomePlanilha: form.nomePlanilha.value,
-    whatsapp: form.whatsapp.value,
-    cidade: form.cidade.value,
-    dezenas: dezenasSelecionadas.sort((a, b) => a - b).join(", "),
-  };
-
-  fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
-    method: "POST",
-    body: JSON.stringify(dados),
-    headers: {
-      "Content-Type": "application/json"
+    function toggleDezena(dezena, btn) {
+      const index = dezenasSelecionadas.indexOf(dezena);
+      if (index > -1) {
+        dezenasSelecionadas.splice(index, 1);
+        btn.style.backgroundColor = "";
+      } else {
+        if (dezenasSelecionadas.length < 10) {
+          dezenasSelecionadas.push(dezena);
+          btn.style.backgroundColor = "#90ee90";
+        } else {
+          alert("Você só pode escolher 10 dezenas.");
+        }
+      }
     }
-  })
-  .then(res => res.json())
-  .then(response => {
-    loading.style.display = "none";
-    alert("Cadastro enviado com sucesso!");
-    window.location.reload();
-  })
-  .catch(error => {
-    loading.style.display = "none";
-    alert("Erro ao enviar. Tente novamente.");
-    console.error("Erro:", error);
-  });
-});
+
+    btnVoltar.addEventListener("click", () => {
+      if (dezenasSelecionadas.length !== 10) {
+        alert("Você deve selecionar exatamente 10 dezenas para participar!");
+        return;
+      }
+
+      loading.style.display = "block";
+
+      const dados = {
+        nome: form.nome.value,
+        nomePlanilha: form.nomePlanilha.value,
+        whatsapp: form.whatsapp.value,
+        cidade: form.cidade.value,
+        dezenas: dezenasSelecionadas.sort((a, b) => a - b).join(", ")
+      };
+
+      fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
+        method: "POST",
+        body: JSON.stringify(dados),
+        headers: {
+          "Content-Type": "application/json"
+        }
+      })
+      .then(res => res.json())
+      .then(response => {
+        loading.style.display = "none";
+        alert("Cadastro enviado com sucesso! Boa sorte no bolão 🍀");
+        window.location.reload();
+      })
+      .catch(error => {
+        loading.style.display = "none";
+        alert("Erro ao enviar. Tente novamente.");
+        console.error("Erro:", error);
+      });
+    });
   </script>
+
 </body>
 </html>
-
