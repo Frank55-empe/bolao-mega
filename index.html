@@ -1,85 +1,193 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Cadastro no Bolão</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Bolão da Mega Positivo</title>
   <style>
-    body { font-family: Arial, sans-serif; padding: 20px; background: #f4f4f4; }
-    form { background: white; padding: 20px; border-radius: 10px; max-width: 400px; margin: auto; }
-    input, select, button { width: 100%; padding: 10px; margin: 10px 0; border-radius: 5px; border: 1px solid #ccc; }
-    .grid { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
-    .grid button { width: 45px; height: 45px; border: none; border-radius: 50%; background: #eee; cursor: pointer; }
-    .grid button.selected { background: #4caf50; color: white; }
-    #loading, #confirmacao { display: none; text-align: center; margin-top: 20px; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(145deg, #00c6ff, #0072ff);
+      color: #fff;
+      padding: 30px;
+      margin: 0;
+    }
+    h1 {
+      text-align: center;
+      color: #ffea00;
+      font-size: 2.2rem;
+      text-shadow: 1px 1px 3px #000;
+    }
+    form {
+      background-color: rgba(255, 255, 255, 0.1);
+      padding: 25px;
+      border-radius: 20px;
+      max-width: 420px;
+      margin: 30px auto;
+      box-shadow: 0 0 15px rgba(0,0,0,0.3);
+    }
+    label {
+      display: block;
+      margin: 10px 0 5px;
+      font-weight: bold;
+      color: #fff;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 10px;
+      margin-bottom: 15px;
+      border: none;
+      border-radius: 10px;
+      font-size: 1rem;
+    }
+    input, select {
+      background: #fff;
+      color: #333;
+    }
+    button {
+      background-color: #ffea00;
+      color: #000;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover {
+      background-color: #ffe100;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin-top: 10px;
+    }
+    .grid button {
+      background-color: #fff;
+      color: #000;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+    .grid button.selected {
+      background-color: #ffea00;
+      color: #000;
+      transform: scale(1.05);
+    }
+    #contador {
+      text-align: center;
+      font-size: 18px;
+      margin-top: 10px;
+      color: #ffea00;
+      font-weight: bold;
+    }
+    #loading {
+      display: none;
+      text-align: center;
+      margin-top: 10px;
+    }
+    #loading img {
+      width: 30px;
+    }
+    #confirmacao {
+      display: none;
+      text-align: center;
+      background: #000000aa;
+      padding: 20px;
+      border-radius: 15px;
+      margin: 20px auto;
+      max-width: 420px;
+      color: #fff;
+    }
+    #confirmacao p {
+      margin: 5px 0;
+    }
+    #btn-voltar {
+      background-color: #fff;
+      color: #0072ff;
+      font-weight: bold;
+      border-radius: 8px;
+      cursor: pointer;
+      padding: 10px;
+      margin-top: 15px;
+    }
   </style>
 </head>
 <body>
+  <h1>Bolão da Mega Positivo<br>(Bar do Enoquis)</h1>
+  <form id="formulario">
+    <label for="nome">Nome completo:</label>
+    <input type="text" id="nome" name="nome" required />
 
-<form id="formulario">
-  <h2>Cadastro no Bolão</h2>
-  <input type="text" name="nome" placeholder="Seu nome completo" required />
-  <input type="text" name="nomePlanilha" placeholder="Nome da planilha desejada" required />
-  <input type="text" name="whatsapp" placeholder="WhatsApp (com DDD)" required />
-  <input type="text" name="cidade" placeholder="Cidade" required />
+    <label for="nomePlanilha">Nome para Planilha:</label>
+    <input type="text" id="nomePlanilha" name="nomePlanilha" required />
 
-  <p>Escolha 6 dezenas:</p>
-  <div class="grid" id="dezenas">
-    <!-- Gera 60 botões de 01 a 60 -->
+    <label for="whatsapp">WhatsApp:</label>
+    <input type="text" id="whatsapp" name="whatsapp" required />
+
+    <label for="cidade">Cidade:</label>
+    <input type="text" id="cidade" name="cidade" required />
+
+    <label>Escolha 10 dezenas:</label>
+    <div id="dezenas" class="grid"></div>
+    <div id="contador">Dezenas escolhidas: 0/10</div>
+
+    <button type="submit">Confirmar Cadastro</button>
+    <div id="loading"><img src="https://i.gifer.com/ZZ5H.gif" alt="Carregando..." /></div>
+  </form>
+
+  <div id="confirmacao">
+    <h2>Confira seus dados:</h2>
+    <p id="resumoDados"></p>
+    <button id="btn-voltar" onclick="window.location.reload()">Voltar</button>
   </div>
 
-  <button type="submit">Enviar</button>
-  <div id="loading">Enviando...</div>
-  <div id="confirmacao">Cadastro enviado com sucesso!</div>
-</form>
+  <script>
+    const form = document.getElementById("formulario");
+    const dezenasContainer = document.getElementById("dezenas");
+    const contador = document.getElementById("contador");
 
-<script>
-  const grid = document.getElementById("dezenas");
-  for (let i = 1; i <= 60; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = i.toString().padStart(2, '0');
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      btn.classList.toggle("selected");
-    });
-    grid.appendChild(btn);
-  }
-
-  const form = document.getElementById("formulario");
-  form.addEventListener("submit", function (e) {
-    e.preventDefault();
-    document.getElementById("loading").style.display = "block";
-
-    const dezenasSelecionadas = Array.from(document.querySelectorAll(".grid button.selected"))
-      .map(btn => btn.textContent)
-      .join(",");
-
-    if (dezenasSelecionadas.split(",").length !== 6) {
-      alert("Você deve selecionar exatamente 6 dezenas.");
-      document.getElementById("loading").style.display = "none";
-      return;
+    for (let i = 1; i <= 60; i++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.textContent = i.toString().padStart(2, '0');
+      btn.addEventListener("click", () => {
+        btn.classList.toggle("selected");
+        const selecionadas = document.querySelectorAll(".grid button.selected");
+        if (selecionadas.length > 10) {
+          btn.classList.remove("selected");
+          alert("Você só pode escolher 10 dezenas!");
+        }
+        contador.textContent = `Dezenas escolhidas: ${selecionadas.length}/10`;
+      });
+      dezenasContainer.appendChild(btn);
     }
 
-    const dados = new FormData(form);
-    dados.append("dezenas", dezenasSelecionadas);
+    form.addEventListener("submit", function (e) {
+      e.preventDefault();
+      document.getElementById("loading").style.display = "block";
 
-    fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
-      method: "POST",
-      body: dados
-    })
-    .then(response => response.text())
-    .then(() => {
-      document.getElementById("loading").style.display = "none";
-      document.getElementById("confirmacao").style.display = "block";
-      form.reset();
-      document.querySelectorAll(".grid button").forEach(btn => btn.classList.remove("selected"));
-    })
-    .catch(err => {
-      alert("Erro ao enviar dados.");
-      document.getElementById("loading").style.display = "none";
+      const dezenasSelecionadas = Array.from(document.querySelectorAll(".grid button.selected"))
+        .map(btn => btn.textContent)
+        .join(",");
+
+      const dados = new FormData(form);
+      dados.append("dezenas", dezenasSelecionadas);
+
+      fetch("https://script.google.com/macros/s/SEU_SCRIPT_ID_AQUI/exec", {
+        method: "POST",
+        body: dados
+      })
+      .then(response => response.text())
+      .then(() => {
+        document.getElementById("loading").style.display = "none";
+        document.getElementById("confirmacao").style.display = "block";
+      })
+      .catch(err => {
+        alert("Erro ao enviar dados. Tente novamente.");
+        document.getElementById("loading").style.display = "none";
+      });
     });
-  });
-</script>
-
+  </script>
 </body>
 </html>
+
