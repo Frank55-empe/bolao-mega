@@ -1,73 +1,115 @@
-<!-- MANTÉM TUDO IGUAL ATÉ A PARTE DO SCRIPT -->
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Bolão da Mega</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 min-h-screen flex items-center justify-center p-4">
+  <div class="bg-white p-8 rounded shadow-md w-full max-w-lg">
+    <h1 class="text-2xl font-bold mb-4 text-center">Bolão da Mega</h1>
+    <form id="megaForm" class="space-y-4">
+      <div>
+        <label for="nome" class="block text-sm font-medium text-gray-700">Nome Completo</label>
+        <input type="text" name="nome" id="nome" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"/>
+      </div>
 
-<script>
-  const dezenasContainer = document.getElementById("dezenasContainer");
-  const msg = document.getElementById("msg");
-  const sucesso = document.getElementById("sucesso");
+      <div>
+        <label for="planilha_nome" class="block text-sm font-medium text-gray-700">Nome para aparecer na planilha</label>
+        <input type="text" name="planilha_nome" id="planilha_nome" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"/>
+      </div>
 
-  for (let i = 1; i <= 60; i++) {
-    const btn = document.createElement("button");
-    btn.textContent = i.toString().padStart(2, "0");
-    btn.className = "bg-gray-200 hover:bg-blue-200 p-2 rounded";
-    btn.addEventListener("click", (e) => {
-      e.preventDefault();
-      btn.classList.toggle("bg-blue-500");
-      btn.classList.toggle("text-white");
+      <div>
+        <label for="whatsapp" class="block text-sm font-medium text-gray-700">WhatsApp</label>
+        <input type="text" name="whatsapp" id="whatsapp" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"/>
+      </div>
 
-      const selecionados = document.querySelectorAll("#dezenasContainer .bg-blue-500");
-      if (selecionados.length > 10) {
-        btn.classList.remove("bg-blue-500", "text-white");
-        btn.classList.add("bg-gray-200");
-      }
+      <div>
+        <label for="cidade" class="block text-sm font-medium text-gray-700">Cidade</label>
+        <input type="text" name="cidade" id="cidade" required class="mt-1 block w-full border border-gray-300 rounded-md p-2"/>
+      </div>
 
-      msg.classList.toggle("hidden", selecionados.length === 10);
-    });
-    dezenasContainer.appendChild(btn);
-  }
+      <div>
+        <label class="block text-sm font-medium text-gray-700 mb-1">Escolha 10 dezenas</label>
+        <div id="dezenasContainer" class="grid grid-cols-6 gap-2"></div>
+        <p id="msg" class="text-red-500 mt-2 hidden">Selecione exatamente 10 dezenas.</p>
+      </div>
 
-  document.getElementById("megaForm").addEventListener("submit", async function (e) {
-    e.preventDefault();
+      <button type="submit" class="bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded w-full">Enviar</button>
+      <p id="sucesso" class="text-green-500 mt-4 hidden">Dados enviados com sucesso!</p>
+    </form>
+  </div>
 
-    const selecionados = Array.from(document.querySelectorAll("#dezenasContainer .bg-blue-500"))
-      .map(btn => btn.textContent);
+  <script>
+    const dezenasContainer = document.getElementById("dezenasContainer");
+    const msg = document.getElementById("msg");
+    const sucesso = document.getElementById("sucesso");
 
-    if (selecionados.length !== 10) {
-      msg.classList.remove("hidden");
-      return;
-    }
+    for (let i = 1; i <= 60; i++) {
+      const btn = document.createElement("button");
+      btn.textContent = i.toString().padStart(2, "0");
+      btn.className = "bg-gray-200 hover:bg-blue-200 p-2 rounded";
+      btn.addEventListener("click", (e) => {
+        e.preventDefault();
+        btn.classList.toggle("bg-blue-500");
+        btn.classList.toggle("text-white");
 
-    const form = e.target;
-    const dados = {
-      nomeCompleto: form.nome.value,
-      nomeParaJogo: form.planilha_nome.value,
-      whatsapp: form.whatsapp.value,
-      cidade: form.cidade.value,
-      dezenas: selecionados
-    };
-
-    try {
-      const res = await fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
-        method: "POST",
-        body: JSON.stringify(dados),
-        headers: {
-          "Content-Type": "application/json"
-        }
-      });
-
-      if (res.ok) {
-        sucesso.classList.remove("hidden");
-        form.reset();
-        document.querySelectorAll("#dezenasContainer .bg-blue-500").forEach(btn => {
+        const selecionados = document.querySelectorAll("#dezenasContainer .bg-blue-500");
+        if (selecionados.length > 10) {
           btn.classList.remove("bg-blue-500", "text-white");
           btn.classList.add("bg-gray-200");
-        });
-      } else {
-        alert("Erro ao enviar. Tente novamente.");
-      }
-    } catch (err) {
-      alert("Erro ao enviar. Tente novamente.");
-      console.error(err);
-    }
-  });
-</script>
+        }
 
+        msg.classList.toggle("hidden", selecionados.length === 10);
+      });
+      dezenasContainer.appendChild(btn);
+    }
+
+    document.getElementById("megaForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+
+      const selecionados = Array.from(document.querySelectorAll("#dezenasContainer .bg-blue-500"))
+        .map(btn => btn.textContent);
+
+      if (selecionados.length !== 10) {
+        msg.classList.remove("hidden");
+        return;
+      }
+
+      const form = e.target;
+      const dados = {
+        nomeCompleto: form.nome.value,
+        nomeParaJogo: form.planilha_nome.value,
+        whatsapp: form.whatsapp.value,
+        cidade: form.cidade.value,
+        dezenas: selecionados
+      };
+
+      try {
+        const res = await fetch("https://script.google.com/macros/s/AKfycbwUXTAnJvNX1FATNnf-c-WrjJnnvx2I1O_MSY0ID7zYAoPWiGTl1w62lYJXhLvpoXyV/exec", {
+          method: "POST",
+          body: JSON.stringify(dados),
+          headers: {
+            "Content-Type": "application/json"
+          }
+        });
+
+        if (res.ok) {
+          sucesso.classList.remove("hidden");
+          form.reset();
+          document.querySelectorAll("#dezenasContainer .bg-blue-500").forEach(btn => {
+            btn.classList.remove("bg-blue-500", "text-white");
+            btn.classList.add("bg-gray-200");
+          });
+        } else {
+          alert("Erro ao enviar. Tente novamente.");
+        }
+      } catch (err) {
+        alert("Erro ao enviar. Tente novamente.");
+        console.error(err);
+      }
+    });
+  </script>
+</body>
+</html>
